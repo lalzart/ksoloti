@@ -124,6 +124,10 @@ public final class MainFrame extends javax.swing.JFrame implements ActionListene
     private final String[] args;
     JMenu favouriteMenu;
     boolean bGrabFocusOnSevereErrors = true;
+    
+    // MCP Server for natural language patch generation
+    private axoloti.mcp.MCPServer mcpServer;
+    private static final int MCP_SERVER_PORT = 8080;
 
     private boolean doAutoScroll = true;
 
@@ -145,6 +149,9 @@ public final class MainFrame extends javax.swing.JFrame implements ActionListene
 
         mainframe = this;
         setVisible(true);
+        
+        // Initialize MCP server
+        initializeMCPServer();
 
         fc = new AxoJFileChooser(prefs.getCurrentFileDirectory());
 
@@ -557,6 +564,24 @@ public final class MainFrame extends javax.swing.JFrame implements ActionListene
 
     }
 
+    /**
+     * Initialize the MCP server for natural language patch generation
+     */
+    private void initializeMCPServer() {
+        try {
+            // Stop any existing MCP server
+            if (mcpServer != null && mcpServer.isRunning()) {
+                LOGGER.info("Stopping existing MCP server");
+                mcpServer.stop();
+            }
+            
+            // Create and start a new server
+            mcpServer = new axoloti.mcp.MCPServer(MCP_SERVER_PORT);
+            mcpServer.start();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to start MCP server", e);
+        }
+    }
 
     public void updateConsoleFont() {
         jTextPaneLog.setFont(Constants.FONT_MONO);
@@ -687,6 +712,7 @@ public final class MainFrame extends javax.swing.JFrame implements ActionListene
         fileMenu = new axoloti.menus.FileMenu();
         jMenuEdit = new javax.swing.JMenu();
         jMenuItemCopy = new javax.swing.JMenuItem();
+        jMenuItemMCP = new javax.swing.JMenuItem();
         jMenuBoard = new javax.swing.JMenu();
         jMenuItemSelectCom = new javax.swing.JMenuItem();
         jMenuItemFConnect = new javax.swing.JMenuItem();
@@ -816,7 +842,21 @@ public final class MainFrame extends javax.swing.JFrame implements ActionListene
         jMenuItemCopy.setMnemonic('C');
         jMenuItemCopy.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyUtils.CONTROL_OR_CMD_MASK));
         jMenuItemCopy.setText("Copy");
+        jMenuItemCopy.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemCopyActionPerformed(evt);
+            }
+        });
         jMenuEdit.add(jMenuItemCopy);
+        
+        // Add the MCP menu item
+        jMenuItemMCP.setText("Create Patch with Natural Language");
+        jMenuItemMCP.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemMCPActionPerformed(evt);
+            }
+        });
+        jMenuEdit.add(jMenuItemMCP);
 
         jMenuBar1.add(jMenuEdit);
 
@@ -1228,7 +1268,26 @@ public final class MainFrame extends javax.swing.JFrame implements ActionListene
 
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {
-        Quit();
+        // Try to quit the application
+        while (!DocumentWindowList.GetList().isEmpty()) {
+            if (DocumentWindowList.GetList().get(0).AskClose()) {
+                return;
+            }
+        }
+        
+        // Save preferences
+        prefs.SavePrefs();
+        
+        // Stop the MCP server
+        if (mcpServer != null && mcpServer.isRunning()) {
+            LOGGER.info("Stopping MCP server");
+            mcpServer.stop();
+        }
+        
+        // Exit if all documents are closed
+        if (DocumentWindowList.GetList().isEmpty()) {
+            System.exit(0);
+        }
     }
 
 
@@ -1402,6 +1461,7 @@ public final class MainFrame extends javax.swing.JFrame implements ActionListene
     private javax.swing.JMenuItem jMenuItemPing;
     private javax.swing.JMenuItem jMenuItemRefreshFWID;
     private javax.swing.JMenuItem jMenuItemSelectCom;
+    private javax.swing.JMenuItem jMenuItemMCP;
     private javax.swing.JPanel jPanelHeader;
     private javax.swing.JPanel jPanelIconColumn;
     private javax.swing.JPanel jPanelButtonsColumn;
@@ -1803,5 +1863,14 @@ public final class MainFrame extends javax.swing.JFrame implements ActionListene
         for (UnitNameListener uncml : uncmls) {
             uncml.ShowUnitName(unitName);
         }
+    }
+
+    private void jMenuItemCopyActionPerformed(java.awt.event.ActionEvent evt) {
+        // TODO add your handling code here:
+    }
+    
+    private void jMenuItemMCPActionPerformed(java.awt.event.ActionEvent evt) {
+        axoloti.mcp.MCPDialog dialog = new axoloti.mcp.MCPDialog(this);
+        dialog.setVisible(true);
     }
 }
