@@ -1,0 +1,41 @@
+name: AI authoring
+
+on:
+  pull_request:
+  push:
+    branches:
+      - codex/ai-native-authoring
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Install validation tools
+        run: |
+          python -m pip install --disable-pip-version-check jsonschema==4.23.0
+          sudo apt-get update
+          sudo apt-get install --yes ant
+      - name: Run AI unit and contract checks
+        run: |
+          python -m unittest discover -s ai/tests -v
+          python ai/tests/check_docs_examples.py
+          python ai/tests/check_schemas.py
+          cc -std=c11 -Wall -Wextra -Werror -I. ai/tests/firmware_abi_v1_compile.c -o /tmp/firmware-abi-v1
+          c++ -x c++ -std=c++11 -Wall -Wextra -Werror -I. ai/tests/firmware_abi_v1_compile.c -o /tmp/firmware-abi-v1-cpp
+          c++ -std=c++11 -Wall -Wextra -Werror ai/sdk/example-library/objects/ai/gain_dsp_test.cpp -o /tmp/ksai-gain-dsp-test
+          /tmp/ksai-gain-dsp-test
+      - name: Build Java and deserialize the deterministic fixture
+        run: |
+          ant test
+          ai/check-axp-java.sh ai/tests/fixtures/deterministic-minimal.axp
