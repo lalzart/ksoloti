@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ksoloti.example/schemas/patch-v1.schema.json",
+  "title": "Ksoloti normalized patch IR v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "patch", "settings", "nodes", "edges", "assertions"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "patch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "target"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "target": {"type": "string", "minLength": 1}
+      }
+    },
+    "settings": {
+      "type": "object",
+      "additionalProperties": {"type": "string"}
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "object", "resolved_ref", "parameters", "parameter_metadata", "attributes"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_-]*$"},
+          "name": {"type": "string", "minLength": 1},
+          "object": {"type": "string", "minLength": 1},
+          "resolved_ref": {"type": "string", "minLength": 1},
+          "parameters": {"type": "object", "additionalProperties": {"type": "string"}},
+          "parameter_metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "midi_cc": {"type": "integer", "minimum": 0, "maximum": 127},
+                "on_parent": {"type": "boolean"},
+                "presets": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["index", "kind", "value"],
+                    "properties": {
+                      "index": {"type": "integer", "minimum": 1, "maximum": 255},
+                      "kind": {"enum": ["i", "f"]},
+                      "value": {"type": "string"}
+                    }
+                  }
+                },
+                "modulations": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["source", "modulator", "value"],
+                    "properties": {
+                      "source": {"type": "string", "minLength": 1},
+                      "modulator": {"type": "string"},
+                      "value": {"type": "string"}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "attributes": {"type": "object", "additionalProperties": {"type": "string"}}
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["from", "to"],
+        "properties": {
+          "from": {"type": "string", "minLength": 3},
+          "to": {"type": "string", "minLength": 3}
+        }
+      }
+    },
+    "assertions": {
+      "type": "object",
+      "additionalProperties": {"type": "string"}
+    }
+  }
+}

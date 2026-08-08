@@ -1,0 +1,14 @@
+kpatch 1
+patch sdk-gain-example
+target ksoloti-core@1.1.0
+
+node input "axoloti-factory:audio/in left"
+node gain ai-sdk:ai/gain
+node out "axoloti-factory:audio/out stereo"
+
+param gain.level 32
+connect input.wave -> gain.in
+connect gain.out -> out.left,out.right
+
+assert output=bounded
+assert work-per-block=16

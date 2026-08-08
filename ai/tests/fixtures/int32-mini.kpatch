@@ -1,0 +1,5 @@
+kpatch 1
+patch int32-mini-compat
+target ksoloti-core@1.1.0
+node selector "axoloti-contrib:jaffa/sel/sel i 16 +/-64D@fae5d888c7146829d98d4f7670698c46f06e3eb7"
+param selector.i0 7

@@ -1,0 +1,5 @@
+# Relative to the Ksoloti 1.1.0 library root passed to the test command.
+axoloti-factory/patches/tutorials/01_sine_oscillator.axp
+axoloti-factory/patches/tutorials/02_keyboard_controlled_sine_oscillator.axp
+axoloti-factory/patches/tutorials/12_subtractive_lfo_env.axp
+axoloti-factory/patches/demos/sensors/physical.axp

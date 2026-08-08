@@ -1,0 +1,26 @@
+<patch-1.0 appVersion="1.1.0">
+   <obj type="osc/sine" uuid="osc-uuid" name="osc~1" x="14" y="14">
+      <params />
+      <attribs />
+   </obj>
+   <obj type="attr/config" uuid="config-uuid" name="config" x="238" y="14">
+      <params />
+      <attribs>
+         <table attributeName="expression" table="outlet_out=inlet_in&gt;0?inlet_in:0" />
+         <combo attributeName="mode" selection="crunch" />
+         <int attributeName="offset" value="-1" />
+         <file attributeName="sample" file="samples/demo.wav" />
+         <text attributeName="script">
+            <sText>line one
+line two</sText>
+         </text>
+         <objref attributeName="target" obj="osc~1" />
+         <spinner attributeName="voices" value="6" />
+      </attribs>
+   </obj>
+   <nets />
+   <settings>
+      <subpatchmode>no</subpatchmode>
+   </settings>
+   <notes />
+</patch-1.0>

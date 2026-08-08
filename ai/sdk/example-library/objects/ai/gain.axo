@@ -1,0 +1,23 @@
+<objdefs appVersion="1.1.0">
+   <obj.normal id="gain" uuid="fdc20230-2ce3-4d95-96c4-7e53bc37d3cb">
+      <sDescription>Reference Object SDK gain with bounded block work.</sDescription>
+      <author>Lance Ship</author>
+      <license>GPL-3.0-or-later</license>
+      <inlets>
+         <frac32buffer name="in" description="audio input"/>
+      </inlets>
+      <outlets>
+         <frac32buffer name="out" description="scaled audio output"/>
+      </outlets>
+      <params>
+         <frac32.u.map name="level" description="linear gain"/>
+      </params>
+      <attribs/>
+      <includes>
+         <include>./gain_dsp.h</include>
+      </includes>
+      <code.declaration><![CDATA[KsolotiAiGainDSP engine;]]></code.declaration>
+      <code.init><![CDATA[engine.Init();]]></code.init>
+      <code.krate><![CDATA[engine.Process(inlet_in, outlet_out, param_level, BUFSIZE);]]></code.krate>
+   </obj.normal>
+</objdefs>

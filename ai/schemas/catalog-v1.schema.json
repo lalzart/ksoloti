@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ksoloti.example/schemas/catalog-v1.schema.json",
+  "title": "Ksoloti legacy object catalog v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "source_format", "libraries", "objects"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "source_format": {"const": "axo-1.x"},
+    "libraries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "object_count", "content_sha256"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "object_count": {"type": "integer", "minimum": 0},
+          "content_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    },
+    "objects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "ref", "base_ref", "library", "id", "legacy_uuid",
+          "description", "author", "license", "source", "inlets",
+          "outlets", "parameters", "attributes", "implementation"
+        ],
+        "properties": {
+          "ref": {"type": "string", "minLength": 1},
+          "base_ref": {"type": "string", "minLength": 1},
+          "library": {"type": "string", "minLength": 1},
+          "id": {"type": "string", "minLength": 1},
+          "legacy_uuid": {"type": "string"},
+          "description": {"type": "string"},
+          "author": {"type": "string"},
+          "license": {"type": "string"},
+          "source": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["path", "sha256", "object_sha256", "legacy_sha", "legacy_hashes"],
+            "properties": {
+              "path": {"type": "string", "minLength": 1},
+              "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+              "object_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+              "legacy_sha": {"type": "string"},
+              "legacy_hashes": {
+                "type": "array",
+                "items": {"type": "string", "minLength": 1},
+                "uniqueItems": true
+              }
+            }
+          },
+          "inlets": {"type": "array"},
+          "outlets": {"type": "array"},
+          "parameters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name", "type", "instance_type"],
+              "properties": {
+                "name": {"type": "string", "minLength": 1},
+                "type": {"type": "string", "minLength": 1},
+                "instance_type": {"type": "string"},
+                "description": {"type": "string"}
+              }
+            }
+          },
+          "attributes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name", "type", "instance_type"],
+              "properties": {
+                "name": {"type": "string", "minLength": 1},
+                "type": {"enum": ["combo", "spinner", "int", "objref", "table", "file", "text"]},
+                "instance_type": {"enum": ["combo", "spinner", "int", "objref", "table", "file", "text"]},
+                "description": {"type": "string"},
+                "choices": {"type": "array", "items": {"type": "string"}},
+                "c_values": {"type": "array", "items": {"type": "string"}},
+                "minimum": {"type": "integer"},
+                "maximum": {"type": "integer"},
+                "default": {"type": "integer"}
+              }
+            }
+          },
+          "implementation": {"type": "object"}
+        }
+      }
+    }
+  }
+}

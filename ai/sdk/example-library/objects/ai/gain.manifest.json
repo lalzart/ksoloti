@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "stable_id": "com.lalzart.ksoloti.ai.gain",
+  "id": "gain",
+  "uuid": "fdc20230-2ce3-4d95-96c4-7e53bc37d3cb",
+  "description": "Reference Object SDK gain with bounded block work.",
+  "author": "Lance Ship",
+  "license": "GPL-3.0-or-later",
+  "ports": {
+    "inlets": [{"name": "in", "type": "frac32buffer", "description": "audio input"}],
+    "outlets": [{"name": "out", "type": "frac32buffer", "description": "scaled audio output"}]
+  },
+  "parameters": [
+    {
+      "id": "com.lalzart.ksoloti.ai.gain.level",
+      "name": "level",
+      "type": "frac32.u.map",
+      "default": "0",
+      "description": "linear gain"
+    }
+  ],
+  "implementation": {
+    "header": "gain_dsp.h",
+    "class_name": "KsolotiAiGainDSP",
+    "instance_name": "engine",
+    "init_method": "Init",
+    "process_method": "Process",
+    "rate": "krate",
+    "arguments": ["inlet_in", "outlet_out", "param_level", "BUFSIZE"]
+  },
+  "resources": {
+    "max_voices": 1,
+    "state_bytes": 0,
+    "scratch_bytes": 0,
+    "bounded_work_per_block": 16
+  },
+  "tests": ["silence", "unity-bound", "negative-input", "maximum-block"]
+}

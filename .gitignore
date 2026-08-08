@@ -58,6 +58,8 @@ tmp/
 *.bak
 *.swp
 *~.nib
+__pycache__/
+*.py[cod]
 local.properties
 .classpath
 .settings/

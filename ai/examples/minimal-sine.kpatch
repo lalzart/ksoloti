@@ -1,0 +1,13 @@
+# Structurally valid against the stock axoloti-factory 1.1.0 library.
+kpatch 1
+patch minimal-sine
+target ksoloti-core@1.1.0
+
+node osc axoloti-factory:osc/sine
+node out "axoloti-factory:audio/out stereo"
+
+param osc.pitch 0
+connect osc.wave -> out.left,out.right
+
+assert startup=silent
+assert output=finite
