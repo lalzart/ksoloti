@@ -39,6 +39,7 @@ import components.control.NumberBoxComponent;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -155,6 +156,11 @@ public abstract class ParameterInstance<T extends Parameter> extends JPanel impl
     }
 
     public void PostConstructor() {
+        /* Target compilation needs parameter values and metadata, not AWT
+         * controls. Avoid constructing controls in the explicit headless path. */
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
         removeAll();
         setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 

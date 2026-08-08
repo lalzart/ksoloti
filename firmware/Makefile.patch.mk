@@ -113,6 +113,10 @@ SPACE := $(EMPTY) $(EMPTY)
 
 BUILDDIR = $(subst $(SPACE),\ ,${axoloti_libraries}/build)
 FIRMWARE = $(subst $(SPACE),\ ,${axoloti_firmware})
+LINK_FIRMWARE = $(subst $(SPACE),\ ,${axoloti_link_firmware})
+ifeq ($(LINK_FIRMWARE),)
+  LINK_FIRMWARE = $(FIRMWARE)
+endif
 CHIBIOS  = $(subst $(SPACE),\ ,${axoloti_home}/chibios)
 CMSIS    = $(subst $(SPACE),\ ,${axoloti_home}/CMSIS)
 
@@ -168,7 +172,7 @@ ${BUILDDIR}/$(BUILDFILENAME).elf: ${BUILDDIR}/$(BUILDFILENAME).cpp ${BUILDDIR}/x
 	@$(CPP) $(CCFLAGS) $(DEFS) -H $(IINCDIR) -Winvalid-pch -MD -MP --include "${BUILDDIR}/xpatch.h" -c "${BUILDDIR}/$(BUILDFILENAME).cpp" -o "${BUILDDIR}/$(BUILDFILENAME).o"
 
 #	@echo Linking patch dependencies
-	@$(LD) $(LDFLAGS) "${BUILDDIR}/$(BUILDFILENAME).o" -lm -Wl,-Map="${BUILDDIR}/$(BUILDFILENAME).map",--cref,--just-symbols="${FIRMWARE}/build/$(ELFNAME).elf" -o "${BUILDDIR}/$(BUILDFILENAME).elf"
+	@$(LD) $(LDFLAGS) "${BUILDDIR}/$(BUILDFILENAME).o" -lm -Wl,-Map="${BUILDDIR}/$(BUILDFILENAME).map",--cref,--just-symbols="${LINK_FIRMWARE}/build/$(ELFNAME).elf" -o "${BUILDDIR}/$(BUILDFILENAME).elf"
 
 
 ${BUILDDIR}/$(BUILDFILENAME).bin_sram3: ${BUILDDIR}/$(BUILDFILENAME).elf

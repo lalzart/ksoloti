@@ -53,6 +53,7 @@ import axoloti.sd.SDCardInfo;
 import axoloti.sd.SDFileReference;
 import axoloti.utils.OSDetect;
 import axoloti.utils.OSDetect.OS;
+import axoloti.utils.FirmwareID;
 import axoloti.utils.Preferences;
 
 import static axoloti.MainFrame.mainframe;
@@ -61,6 +62,7 @@ import static axoloti.utils.FileUtils.toUnixPath;
 
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -505,14 +507,18 @@ public class Patch {
         }
 
         PromoteOverloading(true);
-        ShowPreset(0);
+        if (!GraphicsEnvironment.isHeadless()) {
+            ShowPreset(0);
+        }
 
         if (settings == null) {
             settings = new PatchSettings();
         }
 
         ClearDirty();
-        saveState();
+        if (!GraphicsEnvironment.isHeadless()) {
+            saveState();
+        }
     }
 
     public ArrayList<ParameterInstance> getParameterInstances() {
@@ -1795,6 +1801,9 @@ public class Patch {
 
     String GeneratePatchCodePlusPlus(String ClassName) {
         String c = "";
+        String linkFirmwareID = MainFrame.mainframe != null
+                ? MainFrame.mainframe.LinkFirmwareID
+                : FirmwareID.getFirmwareID();
         c += "};\n\n";
         c += "static rootc root;\n\n";
 
@@ -1964,7 +1973,7 @@ public class Patch {
            + "}\n\n";
 
         c += "void xpatch_init2(uint32_t fwid) {\n"
-           + I + "if (fwid != 0x" + MainFrame.mainframe.LinkFirmwareID + ") {\n"
+           + I + "if (fwid != 0x" + linkFirmwareID + ") {\n"
            + I+I + "// LogTextMessage(\"Patch firmware mismatch\");\n"
            + I+I + "return;\n"
            + I + "}\n\n"
@@ -2011,8 +2020,13 @@ public class Patch {
     }
 
     void CreateIID() {
-        java.util.Random r = new java.util.Random();
-        IID = r.nextInt();
+        String deterministicSource = System.getProperty("axoloti.deterministic_source_sha256");
+        if (deterministicSource != null && deterministicSource.matches("[0-9a-fA-F]{64}")) {
+            IID = (int) Long.parseUnsignedLong(deterministicSource.substring(0, 8), 16);
+        } else {
+            java.util.Random r = new java.util.Random();
+            IID = r.nextInt();
+        }
     }
 
     String GenerateCode3() {
@@ -2037,10 +2051,14 @@ public class Patch {
         CreateIID();
         SortByPrefs();
 
+        String deterministicSource = System.getProperty("axoloti.deterministic_source_sha256");
+        String provenance = deterministicSource != null
+                ? " * Source SHA-256: " + deterministicSource + "\n"
+                : " * File: " + getFileNamePath() + "\n"
+                  + " * Generated: " + DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.now()) + "\n";
         String c = "/*\n"
         + " * Generated using Ksoloti Patcher v" + Version.AXOLOTI_VERSION + " on " + System.getProperty("os.name") + "\n"
-        + " * File: " + getFileNamePath() + "\n"
-        + " * Generated: " + DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.now()) + "\n"
+        + provenance
         + " */\n\n"
         + "#pragma GCC diagnostic ignored \"-Wunused-variable\"\n"
         + "#pragma GCC diagnostic ignored \"-Wunused-parameter\"\n\n";

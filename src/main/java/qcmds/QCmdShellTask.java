@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,6 +41,7 @@ public abstract class QCmdShellTask implements QCmd {
 
     abstract String[] GetExec();
     boolean success;
+    private final List<String> outputLines = Collections.synchronizedList(new ArrayList<String>());
 
     class StreamHandlerThread implements Runnable {
 
@@ -57,6 +60,7 @@ public abstract class QCmdShellTask implements QCmd {
                 br = new BufferedReader(new InputStreamReader(in));
                 String line;
                 while ((line = br.readLine()) != null) {
+                    outputLines.add(line);
                     if (line.contains("overflowed by")) {
                         LOGGER.log(Level.SEVERE, line + "\n\n>>> Patch is too complex to fit in internal RAM. <<<\n");
                     }
@@ -103,6 +107,12 @@ public abstract class QCmdShellTask implements QCmd {
     public boolean success() {
         return success;
     }
+
+    public List<String> getOutputLines() {
+        synchronized (outputLines) {
+            return new ArrayList<String>(outputLines);
+        }
+    }
     
     public String HomeDir() {
         return System.getProperty(axoloti.Axoloti.HOME_DIR);
@@ -129,6 +139,8 @@ public abstract class QCmdShellTask implements QCmd {
         list.add((axoloti.Axoloti.HOME_DIR + "=" + HomeDir()));
         list.add((axoloti.Axoloti.LIBRARIES_DIR + "=" + LibrariesDir()));
         list.add((axoloti.Axoloti.FIRMWARE_DIR + "=" + FirmwareDir()));
+        list.add((axoloti.Axoloti.LINK_FIRMWARE_DIR + "="
+                + System.getProperty(axoloti.Axoloti.LINK_FIRMWARE_DIR)));
         list.add((axoloti.Axoloti.PLATFORM_DIR + "=" + PlatformDir()));
 
         String vars[] = new String[list.size()];

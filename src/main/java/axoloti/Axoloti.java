@@ -68,6 +68,7 @@ public class Axoloti {
     public final static String HOME_DIR       = "axoloti_home";
     public final static String LIBRARIES_DIR  = "axoloti_libraries";
     public final static String FIRMWARE_DIR   = "axoloti_firmware";
+    public final static String LINK_FIRMWARE_DIR = "axoloti_link_firmware";
     public final static String PLATFORM_DIR   = "axoloti_platform";
 
     private static String cacheFWDir = null;
@@ -84,6 +85,12 @@ public class Axoloti {
      * @param args the command line arguments
      */
     public static void main(final String[] args) {
+
+        /* The compile-only path must run before any Desktop, Swing, single-instance,
+         * splash-screen, command-queue, or USB initialization. */
+        if (HeadlessPatchCompiler.isRequested(args)) {
+            System.exit(HeadlessPatchCompiler.run(args));
+        }
 
         if (OSDetect.getOS() == OS.MAC && Desktop.isDesktopSupported()) {
             Desktop.getDesktop().setOpenFileHandler(new OpenFilesHandlerImpl());
@@ -309,6 +316,10 @@ public class Axoloti {
     }
 
     private static void initProperties() throws URISyntaxException, IOException {
+        initProperties(true);
+    }
+
+    static void initProperties(boolean cleanBuild) throws URISyntaxException, IOException {
         File jarFile = new File(Axoloti.class.getProtectionDomain().getCodeSource().getLocation().toURI());
         String defaultHome = ".";
         String defaultLibraries = "defaultLibraries";
@@ -359,11 +370,17 @@ public class Axoloti {
             builddir.mkdir();
         }
 
-        deletePrecompiledHeaderFile();
+        if (cleanBuild) {
+            deletePrecompiledHeaderFile();
+        }
 
         BuildEnv(FIRMWARE_DIR, System.getProperty(HOME_DIR) + File.separator + "firmware");
         if (!TestDir(FIRMWARE_DIR)) {
             System.err.println("Firmware directory is invalid");
+        }
+        BuildEnv(LINK_FIRMWARE_DIR, System.getProperty(FIRMWARE_DIR));
+        if (!TestDir(LINK_FIRMWARE_DIR)) {
+            System.err.println("Link firmware directory is invalid");
         }
 
         if (os != null) {
@@ -400,6 +417,7 @@ public class Axoloti {
                 + "Jar = " + jarFile.getParentFile().getCanonicalPath() + "\n"
                 + "Home = " + System.getProperty(HOME_DIR) + "\n"
                 + "Firmware = " + System.getProperty(FIRMWARE_DIR) + "\n"
+                + "Link Firmware = " + System.getProperty(LINK_FIRMWARE_DIR) + "\n"
                 + "Libraries = " + System.getProperty(LIBRARIES_DIR) + "\n"
                 + "Platform = " + System.getProperty(PLATFORM_DIR) + "\n"
         );

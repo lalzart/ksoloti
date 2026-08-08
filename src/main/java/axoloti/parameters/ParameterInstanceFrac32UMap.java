@@ -28,6 +28,7 @@ import components.AssignModulatorComponent;
 import components.AssignModulatorMenuItems;
 import components.AssignPresetComponent;
 import components.control.DialComponent;
+import java.awt.GraphicsEnvironment;
 import javax.swing.BoxLayout;
 import javax.swing.JMenu;
 import javax.swing.JPanel;
@@ -75,6 +76,9 @@ public class ParameterInstanceFrac32UMap<T extends ParameterFrac32> extends Para
     @Override
     public void PostConstructor() {
         super.PostConstructor();
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
         JPanel btns = new JPanel();
         btns.setBackground(Theme.Object_Default_Background);
         btns.setLayout(new BoxLayout(btns, BoxLayout.PAGE_AXIS));

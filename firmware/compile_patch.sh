@@ -9,10 +9,10 @@ case "$unamestr" in
         export axoloti_firmware=${axoloti_firmware:="$currentdir"}
         case "$unamearch" in
             aarch64|arm64)
-                export PATH="${axoloti_home}/platform_linux_aarch64/bin:$PATH"
+                platformdir=${axoloti_platform:="${axoloti_home}/platform_linux_aarch64"}
             ;;
             x86_64)
-                export PATH="${axoloti_home}/platform_linux_x64/bin:$PATH"
+                platformdir=${axoloti_platform:="${axoloti_home}/platform_linux_x64"}
             ;;
             *)
                 printf "\nUnknown CPU architecture: $unamearch - aborting...\n"
@@ -26,10 +26,10 @@ case "$unamestr" in
         export axoloti_firmware=${axoloti_firmware:="$currentdir"}
         case "$unamearch" in
             aarch64|arm64)
-                export PATH="${axoloti_home}/platform_mac_aarch64/bin:$PATH"
+                platformdir=${axoloti_platform:="${axoloti_home}/platform_mac_aarch64"}
             ;;
             x86_64)
-                export PATH="${axoloti_home}/platform_mac_x64/bin:$PATH"
+                platformdir=${axoloti_platform:="${axoloti_home}/platform_mac_x64"}
             ;;
             *)
                 printf "\nUnknown CPU architecture: $unamearch - aborting...\n"
@@ -42,6 +42,8 @@ case "$unamestr" in
         exit
     ;;
 esac
+
+export PATH="${platformdir}/bin:$PATH"
 
 # echo "Compiling patch via ${axoloti_firmware}"
 cd "${axoloti_firmware}"
