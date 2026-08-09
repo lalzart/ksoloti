@@ -1,0 +1,39 @@
+# External-audio pitch and level follower driving the complete macro voice.
+kpatch 1
+patch extended-audio-reactive-macro-voice
+target ksoloti-core@1.1.0
+
+node input "axoloti-factory:audio/in left"
+node tracker ksoloti-extended:extended/analysis/pitch-amdf
+node voice ksoloti-extended:extended/synthesis/macro-voice
+node out "axoloti-factory:audio/out stereo"
+
+param tracker.minimum_frequency 50
+param tracker.maximum_frequency 1200
+param tracker.threshold 2
+param tracker.quality 16
+param tracker.smooth 24
+param voice.engine 0
+param voice.pitch 0
+param voice.harmonics 32
+param voice.timbre 32
+param voice.morph 32
+param voice.frequency_modulation 0
+param voice.timbre_modulation 0
+param voice.morph_modulation 0
+param voice.decay 36
+param voice.lpg_colour 38
+param voice.drone 0
+param voice.external_level 1
+
+connect input.wave -> tracker.input
+connect tracker.valid -> voice.trigger
+connect tracker.pitch -> voice.pitch
+connect tracker.level -> voice.level
+connect voice.output -> out.left
+connect voice.aux -> out.right
+
+assert input=monophonic-periodic
+assert pitch=retained-when-invalid
+assert macro-engines=24
+assert target-profile=required

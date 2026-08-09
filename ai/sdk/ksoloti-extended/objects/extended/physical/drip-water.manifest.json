@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "stable_id": "com.lalzart.ksoloti.extended.physical.drip-water",
+  "id": "drip-water",
+  "uuid": "4fb3b79c-7687-5457-a168-10ad4a6a8069",
+  "description": "Seeded three-resonator water-droplet physical model with triggered bursts or autonomous activity. Tags: physical-model, water, droplets, resonator, seedable, stereo-pair.",
+  "author": "Lance Ship",
+  "license": "GPL-3.0-or-later",
+  "ports": {"inlets": [{"name": "trigger", "type": "bool32", "description": "start a short droplet burst"}, {"name": "activity", "type": "frac32", "description": "positive autonomous-density modulation"}], "outlets": [{"name": "output", "type": "frac32buffer", "description": "left response"}, {"name": "aux", "type": "frac32buffer", "description": "right response"}]},
+  "parameters": [
+    {"id": "com.lalzart.ksoloti.extended.physical.drip-water.activity", "name": "activity", "type": "frac32.u.map", "default": "18"},
+    {"id": "com.lalzart.ksoloti.extended.physical.drip-water.damping", "name": "damping", "type": "frac32.u.map", "default": "42"},
+    {"id": "com.lalzart.ksoloti.extended.physical.drip-water.brightness", "name": "brightness", "type": "frac32.u.map", "default": "36"},
+    {"id": "com.lalzart.ksoloti.extended.physical.drip-water.spread", "name": "spread", "type": "frac32.u.map", "default": "38"},
+    {"id": "com.lalzart.ksoloti.extended.physical.drip-water.seed", "name": "seed", "type": "int32", "default": "1", "minimum": -2147483648, "maximum": 2147483647}
+  ],
+  "implementation": {"header": "drip_water_dsp.h", "class_name": "KsolotiExtendedDripWaterDSP", "instance_name": "engine", "init_method": "Init", "process_method": "Process", "rate": "krate", "arguments": ["inlet_trigger", "inlet_activity", "param_activity", "param_damping", "param_brightness", "param_spread", "param_seed", "outlet_output", "outlet_aux", "BUFSIZE"]},
+  "resources": {"max_voices": 1, "state_bytes": 44, "scratch_bytes": 24, "bounded_work_per_block": 2048},
+  "compatibility": {"tier": "core", "build_status": "offline-verified", "tested_targets": ["host-c++17", "ksoloti-core@1.1.0"], "notes": "Portable tests and the granular-water Cortex-M4 link passed."},
+  "tests": ["startup-silent", "triggered-energy", "seed-repeatability", "finite-output"]
+}

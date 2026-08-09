@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "stable_id": "com.lalzart.ksoloti.extended.physical.resonator",
+  "id": "resonator",
+  "uuid": "f0bd4354-c264-5cdb-b976-4859d0ef1958",
+  "description": "Polyphonic physical resonator with modal, sympathetic-string, and dispersive-string models. It accepts external audio excitation or generates an internal pluck on a rising strum, and returns complementary main and auxiliary responses. Uses the MIT-licensed Rings DSP carried by Ksoloti. Tags: physical-model, resonator, modal, string, exciter, polyphonic, stereo-pair, heavy.",
+  "author": "Lance Ship; DSP by Emilie Gillet",
+  "license": "GPL-3.0-or-later wrapper; MIT DSP",
+  "ports": {
+    "inlets": [
+      {"name": "input", "type": "frac32buffer", "description": "external audio excitation"},
+      {"name": "strum", "type": "bool32", "description": "excite or allocate a voice on rising edge"},
+      {"name": "pitch", "type": "frac32.bipolar", "description": "pitch modulation over plus or minus 64 semitones"},
+      {"name": "structure", "type": "frac32", "description": "inharmonic structure modulation"},
+      {"name": "brightness", "type": "frac32", "description": "exciter and resonator brightness modulation"},
+      {"name": "damping", "type": "frac32", "description": "decay and absorption modulation"},
+      {"name": "position", "type": "frac32", "description": "excitation and pickup position modulation"}
+    ],
+    "outlets": [
+      {"name": "output", "type": "frac32buffer", "description": "main response or odd modes"},
+      {"name": "aux", "type": "frac32buffer", "description": "auxiliary response or even modes"}
+    ]
+  },
+  "parameters": [
+    {"id": "com.lalzart.ksoloti.extended.physical.resonator.pitch", "name": "pitch", "type": "frac32.s.map", "default": "0", "description": "pitch offset around MIDI note 60"},
+    {"id": "com.lalzart.ksoloti.extended.physical.resonator.structure", "name": "structure", "type": "frac32.u.map", "default": "24", "description": "inharmonic structure or string relationship"},
+    {"id": "com.lalzart.ksoloti.extended.physical.resonator.brightness", "name": "brightness", "type": "frac32.u.map", "default": "40", "description": "excitation and partial brightness"},
+    {"id": "com.lalzart.ksoloti.extended.physical.resonator.damping", "name": "damping", "type": "frac32.u.map", "default": "36", "description": "decay and absorption"},
+    {"id": "com.lalzart.ksoloti.extended.physical.resonator.position", "name": "position", "type": "frac32.u.map", "default": "20", "description": "excitation and pickup position"},
+    {"id": "com.lalzart.ksoloti.extended.physical.resonator.model", "name": "model", "type": "int32", "default": "0", "minimum": 0, "maximum": 2, "description": "0 modal, 1 sympathetic strings, 2 dispersive string"},
+    {"id": "com.lalzart.ksoloti.extended.physical.resonator.voices", "name": "voices", "type": "int32", "default": "0", "minimum": 0, "maximum": 3, "description": "zero-based polyphony selection: 0 is one voice through 3 is four voices"},
+    {"id": "com.lalzart.ksoloti.extended.physical.resonator.external", "name": "external", "type": "bool32.tgl", "default": "0", "description": "disable the internal pluck and use only the audio input"}
+  ],
+  "implementation": {
+    "header": "physical_resonator_dsp.h",
+    "class_name": "KsolotiExtendedPhysicalResonatorDSP",
+    "instance_name": "engine",
+    "init_method": "Init",
+    "process_method": "Process",
+    "rate": "krate",
+    "arguments": ["inlet_input", "inlet_strum", "inlet_pitch", "inlet_structure", "inlet_brightness", "inlet_damping", "inlet_position", "param_pitch", "param_structure", "param_brightness", "param_damping", "param_position", "param_model", "param_voices", "param_external", "outlet_output", "outlet_aux", "BUFSIZE"]
+  },
+  "resources": {"max_voices": 4, "state_bytes": 180224, "scratch_bytes": 0, "bounded_work_per_block": 8192},
+  "compatibility": {"tier": "core-heavy", "build_status": "offline-verified", "tested_targets": ["ksoloti-core@1.1.0"], "notes": "Cortex-M4 compile and link passed; large delay memory is allocated from SDRAM, and connected-board CPU profiling is still required."},
+  "tests": ["startup-silent", "finite-output", "model-bound", "polyphony-bound", "rising-edge-strum", "target-memory-report"]
+}

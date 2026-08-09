@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "stable_id": "com.lalzart.ksoloti.extended.random.smooth",
+  "id": "smooth",
+  "uuid": "2a072f9d-8ab2-586f-ae9d-3d486e49b65c",
+  "description": "Continuously interpolated seeded bipolar random modulation, free-running or advanced by external clock. Tags: random, smooth, modulation, seedable, clocked, deterministic.",
+  "author": "Lance Ship",
+  "license": "GPL-3.0-or-later",
+  "ports": {"inlets": [{"name": "clock", "type": "bool32", "description": "choose a new target on rising edge in clocked mode"}, {"name": "reset", "type": "bool32", "description": "restart seeded sequence"}], "outlets": [{"name": "output", "type": "frac32.bipolar", "description": "interpolated bipolar value"}, {"name": "raw", "type": "frac32.bipolar", "description": "current random target"}]},
+  "parameters": [
+    {"id": "com.lalzart.ksoloti.extended.random.smooth.rate", "name": "rate", "type": "frac32.u.map", "default": "16"},
+    {"id": "com.lalzart.ksoloti.extended.random.smooth.smooth", "name": "smooth", "type": "frac32.u.map", "default": "48"},
+    {"id": "com.lalzart.ksoloti.extended.random.smooth.seed", "name": "seed", "type": "int32", "default": "1", "minimum": -2147483648, "maximum": 2147483647},
+    {"id": "com.lalzart.ksoloti.extended.random.smooth.clocked", "name": "clocked", "type": "bool32.tgl", "default": "0"}
+  ],
+  "implementation": {"header": "smooth_random_dsp.h", "class_name": "KsolotiExtendedSmoothRandomDSP", "instance_name": "engine", "init_method": "Init", "process_method": "Process", "rate": "krate", "arguments": ["inlet_clock", "inlet_reset", "param_rate", "param_smooth", "param_seed", "param_clocked", "outlet_output", "outlet_raw", "BUFSIZE"]},
+  "resources": {"max_voices": 1, "state_bytes": 24, "scratch_bytes": 0, "bounded_work_per_block": 96},
+  "compatibility": {"tier": "core", "build_status": "offline-verified", "tested_targets": ["host-c++17", "ksoloti-core@1.1.0"], "notes": "Portable tests and the combined control-scenes Cortex-M4 link passed."},
+  "tests": ["seed-repeatability", "bounded-output", "clock-edge-target", "continuous-interpolation"]
+}

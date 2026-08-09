@@ -1,0 +1,77 @@
+# A control-rich instrument using scene morphing and compact timing utilities.
+kpatch 1
+patch extended-control-scenes
+target ksoloti-core@1.1.0
+
+node clock axoloti-factory:lfo/square
+node timing ksoloti-extended:extended/timing/adaptive-clock
+node pulses ksoloti-extended:extended/random/pulse-randomizer
+node smooth ksoloti-extended:extended/random/smooth
+node bounce ksoloti-extended:extended/modulation/bounce
+node segments ksoloti-extended:extended/modulation/segment-6
+node scenes ksoloti-extended:extended/control/keyframes-4
+node body ksoloti-extended:extended/physical/resonator
+node out "axoloti-factory:audio/out stereo"
+
+param clock.pitch -28
+param timing.ratio 0
+param timing.smoothing 24
+param pulses.probability 48
+param pulses.width 3
+param pulses.variation 6
+param pulses.seed 27
+param smooth.rate 16
+param smooth.smooth 48
+param smooth.seed 19
+param smooth.clocked 1
+param bounce.gravity 32
+param bounce.rebound 28
+param bounce.loss 20
+param segments.level1 64
+param segments.level2 32
+param segments.level3 48
+param segments.level4 16
+param segments.level5 40
+param segments.level6 0
+param segments.time1 12
+param segments.time2 20
+param segments.time3 28
+param segments.time4 16
+param segments.time5 24
+param segments.time6 32
+param segments.shape 24
+param segments.sustain 2
+param segments.loop 1
+param scenes.position 0
+param scenes.slot 0
+param scenes.frames 4
+param scenes.curve 1
+param body.pitch 0
+param body.structure 24
+param body.brightness 40
+param body.damping 42
+param body.position 20
+param body.model 0
+param body.voices 1
+param body.external 0
+
+connect clock.wave -> timing.tap,pulses.clock,smooth.clock
+connect timing.clock -> segments.trigger
+connect pulses.pulse -> bounce.trigger,scenes.record,body.strum
+connect smooth.output -> scenes.position
+connect bounce.height -> scenes.input1
+connect segments.output -> scenes.input2
+connect pulses.value -> scenes.input3
+connect timing.phase -> scenes.input4
+connect scenes.output1 -> body.structure
+connect scenes.output2 -> body.brightness
+connect scenes.output3 -> body.damping
+connect scenes.output4 -> body.position
+connect body.output -> out.left
+connect body.aux -> out.right
+
+assert random=seeded
+assert scenes=recordable-four-channel
+assert timing=adaptive
+assert output=finite
+assert target-profile=required

@@ -1,0 +1,44 @@
+<objdefs appVersion="1.1.0">
+   <obj.normal id="keyframes-4" uuid="90d4e5f7-d708-5dd3-b942-abcb43b127c0">
+      <sDescription>Record and morph between two to eight four-channel control scenes. Position scans adjacent scenes with linear, smooth, or stepped interpolation. Tags: control, scenes, morph, keyframes, recordable, deterministic.</sDescription>
+      <author>Lance Ship</author>
+      <license>GPL-3.0-or-later</license>
+      <inlets>
+         <bool32 name="record" description="store inputs in the selected slot on a rising edge"/>
+         <frac32 name="position" description="positive scan modulation"/>
+         <frac32 name="input1" description="channel one value to record"/>
+         <frac32 name="input2" description="channel two value to record"/>
+         <frac32 name="input3" description="channel three value to record"/>
+         <frac32 name="input4" description="channel four value to record"/>
+      </inlets>
+      <outlets>
+         <frac32 name="output1" description="morphed channel one"/>
+         <frac32 name="output2" description="morphed channel two"/>
+         <frac32 name="output3" description="morphed channel three"/>
+         <frac32 name="output4" description="morphed channel four"/>
+         <int32 name="segment" description="current left scene index"/>
+      </outlets>
+      <params>
+         <frac32.u.map name="position" description="scene scan position"/>
+         <int32 name="slot" description="record destination">
+            <MinValue i="0"/>
+            <MaxValue i="7"/>
+         </int32>
+         <int32 name="frames" description="active scene count">
+            <MinValue i="2"/>
+            <MaxValue i="8"/>
+         </int32>
+         <int32 name="curve" description="0 linear, 1 smooth, 2 stepped">
+            <MinValue i="0"/>
+            <MaxValue i="2"/>
+         </int32>
+      </params>
+      <attribs/>
+      <includes>
+         <include>./keyframes_4_dsp.h</include>
+      </includes>
+      <code.declaration><![CDATA[KsolotiExtendedKeyframes4DSP engine;]]></code.declaration>
+      <code.init><![CDATA[engine.Init();]]></code.init>
+      <code.krate><![CDATA[engine.Process(inlet_record, inlet_position, inlet_input1, inlet_input2, inlet_input3, inlet_input4, param_position, param_slot, param_frames, param_curve, outlet_output1, outlet_output2, outlet_output3, outlet_output4, outlet_segment);]]></code.krate>
+   </obj.normal>
+</objdefs>

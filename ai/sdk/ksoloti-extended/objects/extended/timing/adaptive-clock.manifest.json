@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "stable_id": "com.lalzart.ksoloti.extended.timing.adaptive-clock",
+  "id": "adaptive-clock",
+  "uuid": "02290e30-4c43-5ad5-b324-42cb90576589",
+  "description": "Tap-period tracker and predictive clock with smoothing and integer divide or multiply ratios. It coasts after irregular taps and drops lock after ten seconds. Tags: timing, tap-tempo, clock-predictor, irregular-clock, divider, multiplier.",
+  "author": "Lance Ship",
+  "license": "GPL-3.0-or-later",
+  "ports": {"inlets": [{"name": "tap", "type": "bool32", "description": "measure interval on rising edge"}, {"name": "reset", "type": "bool32", "description": "clear lock"}], "outlets": [{"name": "clock", "type": "bool32", "description": "predicted one-block clock pulse"}, {"name": "phase", "type": "frac32", "description": "predicted ramp phase"}, {"name": "locked", "type": "bool32", "description": "two or more usable taps have been seen"}]},
+  "parameters": [
+    {"id": "com.lalzart.ksoloti.extended.timing.adaptive-clock.ratio", "name": "ratio", "type": "int32", "default": "0", "minimum": -4, "maximum": 4, "description": "negative divides, zero follows, positive multiplies"},
+    {"id": "com.lalzart.ksoloti.extended.timing.adaptive-clock.smoothing", "name": "smoothing", "type": "frac32.u.map", "default": "24", "description": "period adaptation smoothing"}
+  ],
+  "implementation": {"header": "adaptive_clock_dsp.h", "class_name": "KsolotiExtendedAdaptiveClockDSP", "instance_name": "engine", "init_method": "Init", "process_method": "Process", "rate": "krate", "arguments": ["inlet_tap", "inlet_reset", "param_ratio", "param_smoothing", "outlet_clock", "outlet_phase", "outlet_locked", "BUFSIZE"]},
+  "resources": {"max_voices": 1, "state_bytes": 16, "scratch_bytes": 0, "bounded_work_per_block": 72},
+  "compatibility": {"tier": "core", "build_status": "offline-verified", "tested_targets": ["host-c++17", "ksoloti-core@1.1.0"], "notes": "Portable tests and the combined control-scenes Cortex-M4 link passed."},
+  "tests": ["two-tap-lock", "period-smoothing", "ratio-bound", "timeout-unlocks"]
+}

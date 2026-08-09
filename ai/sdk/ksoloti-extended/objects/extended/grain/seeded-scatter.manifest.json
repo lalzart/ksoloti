@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "stable_id": "com.lalzart.ksoloti.extended.grain.seeded-scatter",
+  "id": "seeded-scatter",
+  "uuid": "8b5388f2-b4ee-58fd-b339-c73920b45b71",
+  "description": "Four-voice seeded granular scatter over a fixed recent-audio buffer, with manual or density-driven grain creation, pitch, spread, and bounded feedback. Tags: grain, scatter, seeded, stereo, delay-buffer, external-audio, heavy.",
+  "author": "Lance Ship",
+  "license": "GPL-3.0-or-later",
+  "ports": {"inlets": [{"name": "input", "type": "frac32buffer.bipolar", "description": "audio written into the recent-history buffer"}, {"name": "trigger", "type": "bool32", "description": "spawn a grain on rising edge"}], "outlets": [{"name": "left", "type": "frac32buffer.bipolar", "description": "left grain mix"}, {"name": "right", "type": "frac32buffer.bipolar", "description": "right grain mix"}]},
+  "parameters": [
+    {"id": "com.lalzart.ksoloti.extended.grain.seeded-scatter.density", "name": "density", "type": "frac32.u.map", "default": "18"},
+    {"id": "com.lalzart.ksoloti.extended.grain.seeded-scatter.size", "name": "size", "type": "frac32.u.map", "default": "28"},
+    {"id": "com.lalzart.ksoloti.extended.grain.seeded-scatter.pitch", "name": "pitch", "type": "frac32.u.map", "default": "21"},
+    {"id": "com.lalzart.ksoloti.extended.grain.seeded-scatter.spread", "name": "spread", "type": "frac32.u.map", "default": "48"},
+    {"id": "com.lalzart.ksoloti.extended.grain.seeded-scatter.feedback", "name": "feedback", "type": "frac32.u.map", "default": "12"},
+    {"id": "com.lalzart.ksoloti.extended.grain.seeded-scatter.seed", "name": "seed", "type": "int32", "default": "1", "minimum": -2147483648, "maximum": 2147483647}
+  ],
+  "implementation": {"header": "seeded_scatter_dsp.h", "class_name": "KsolotiExtendedSeededScatterDSP", "instance_name": "engine", "init_method": "Init", "process_method": "Process", "rate": "krate", "arguments": ["inlet_input", "inlet_trigger", "param_density", "param_size", "param_pitch", "param_spread", "param_feedback", "param_seed", "outlet_left", "outlet_right", "BUFSIZE"]},
+  "resources": {"max_voices": 4, "state_bytes": 16480, "scratch_bytes": 0, "bounded_work_per_block": 6144},
+  "compatibility": {"tier": "core-heavy", "build_status": "offline-verified", "tested_targets": ["host-c++17", "ksoloti-core@1.1.0"], "notes": "Portable tests and the combined granular-water Cortex-M4 link passed; profile in combinations on Core."},
+  "tests": ["startup-silent", "manual-grain", "seed-repeatability", "four-voice-bound", "feedback-bound"]
+}

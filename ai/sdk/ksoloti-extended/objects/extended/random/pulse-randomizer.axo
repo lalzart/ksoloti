@@ -1,0 +1,31 @@
+<objdefs appVersion="1.1.0">
+   <obj.normal id="pulse-randomizer" uuid="15bb0609-6c76-59ac-80b0-767c4b587fb7">
+      <sDescription>Seeded clock pulse randomizer with probability, variable width, and width variation. Each input edge also captures a repeatable random value. Tags: random, pulse, clock, probability, seedable, deterministic.</sDescription>
+      <author>Lance Ship</author>
+      <license>GPL-3.0-or-later</license>
+      <inlets>
+         <bool32 name="clock" description="make a decision on each rising edge"/>
+         <bool32 name="reset" description="restart the seeded sequence"/>
+      </inlets>
+      <outlets>
+         <bool32 name="pulse" description="randomized gate"/>
+         <frac32 name="value" description="random value retained between clock edges"/>
+      </outlets>
+      <params>
+         <frac32.u.map name="probability"/>
+         <frac32.u.map name="width"/>
+         <frac32.u.map name="variation"/>
+         <int32 name="seed">
+            <MinValue i="-2147483648"/>
+            <MaxValue i="2147483647"/>
+         </int32>
+      </params>
+      <attribs/>
+      <includes>
+         <include>./pulse_randomizer_dsp.h</include>
+      </includes>
+      <code.declaration><![CDATA[KsolotiExtendedPulseRandomizerDSP engine;]]></code.declaration>
+      <code.init><![CDATA[engine.Init();]]></code.init>
+      <code.krate><![CDATA[engine.Process(inlet_clock, inlet_reset, param_probability, param_width, param_variation, param_seed, outlet_pulse, outlet_value);]]></code.krate>
+   </obj.normal>
+</objdefs>

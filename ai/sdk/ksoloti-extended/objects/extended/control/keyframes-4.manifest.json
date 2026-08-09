@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "stable_id": "com.lalzart.ksoloti.extended.control.keyframes-4",
+  "id": "keyframes-4",
+  "uuid": "90d4e5f7-d708-5dd3-b942-abcb43b127c0",
+  "description": "Record and morph between two to eight four-channel control scenes. Position scans adjacent scenes with linear, smooth, or stepped interpolation. Tags: control, scenes, morph, keyframes, recordable, deterministic.",
+  "author": "Lance Ship",
+  "license": "GPL-3.0-or-later",
+  "ports": {
+    "inlets": [
+      {"name": "record", "type": "bool32", "description": "store inputs in the selected slot on a rising edge"},
+      {"name": "position", "type": "frac32", "description": "positive scan modulation"},
+      {"name": "input1", "type": "frac32", "description": "channel one value to record"},
+      {"name": "input2", "type": "frac32", "description": "channel two value to record"},
+      {"name": "input3", "type": "frac32", "description": "channel three value to record"},
+      {"name": "input4", "type": "frac32", "description": "channel four value to record"}
+    ],
+    "outlets": [
+      {"name": "output1", "type": "frac32", "description": "morphed channel one"},
+      {"name": "output2", "type": "frac32", "description": "morphed channel two"},
+      {"name": "output3", "type": "frac32", "description": "morphed channel three"},
+      {"name": "output4", "type": "frac32", "description": "morphed channel four"},
+      {"name": "segment", "type": "int32", "description": "current left scene index"}
+    ]
+  },
+  "parameters": [
+    {"id": "com.lalzart.ksoloti.extended.control.keyframes-4.position", "name": "position", "type": "frac32.u.map", "default": "0", "description": "scene scan position"},
+    {"id": "com.lalzart.ksoloti.extended.control.keyframes-4.slot", "name": "slot", "type": "int32", "default": "0", "minimum": 0, "maximum": 7, "description": "record destination"},
+    {"id": "com.lalzart.ksoloti.extended.control.keyframes-4.frames", "name": "frames", "type": "int32", "default": "4", "minimum": 2, "maximum": 8, "description": "active scene count"},
+    {"id": "com.lalzart.ksoloti.extended.control.keyframes-4.curve", "name": "curve", "type": "int32", "default": "1", "minimum": 0, "maximum": 2, "description": "0 linear, 1 smooth, 2 stepped"}
+  ],
+  "implementation": {
+    "header": "keyframes_4_dsp.h", "class_name": "KsolotiExtendedKeyframes4DSP", "instance_name": "engine",
+    "init_method": "Init", "process_method": "Process", "rate": "krate",
+    "arguments": ["inlet_record", "inlet_position", "inlet_input1", "inlet_input2", "inlet_input3", "inlet_input4", "param_position", "param_slot", "param_frames", "param_curve", "outlet_output1", "outlet_output2", "outlet_output3", "outlet_output4", "outlet_segment"]
+  },
+  "resources": {"max_voices": 1, "state_bytes": 132, "scratch_bytes": 0, "bounded_work_per_block": 96},
+  "compatibility": {"tier": "core", "build_status": "offline-verified", "tested_targets": ["host-c++17", "ksoloti-core@1.1.0"], "notes": "Portable tests and the combined control-scenes Cortex-M4 link passed."},
+  "tests": ["record-rising-edge", "frame-count-clamp", "linear-midpoint", "stepped-selection"]
+}

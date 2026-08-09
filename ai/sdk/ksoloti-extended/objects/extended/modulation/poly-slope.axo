@@ -1,0 +1,36 @@
+<objdefs appVersion="1.1.0">
+   <obj.normal id="poly-slope" uuid="6a914841-7f30-55e2-bf7b-16995393e623">
+      <sDescription>Four phase-related bipolar modulation outputs with continuously variable rise/fall balance, curvature, and smoothing. It free-runs from 0.02 to 40 Hz or measures an external clock and locks one cycle to its period. Outputs are control-rate and deterministic. Tags: modulation, function-generator, LFO, clock-sync, quadrature, bounded.</sDescription>
+      <author>Lance Ship</author>
+      <license>GPL-3.0-or-later</license>
+      <inlets>
+         <bool32 name="clock" description="period measurement and phase restart on rising edge when clocked"/>
+         <bool32 name="reset" description="phase reset on rising edge"/>
+         <frac32 name="rate" description="positive rate modulation"/>
+         <frac32 name="shape" description="positive curvature modulation"/>
+         <frac32 name="slope" description="positive rise/fall balance modulation"/>
+         <frac32 name="smooth" description="positive corner smoothing modulation"/>
+      </inlets>
+      <outlets>
+         <frac32.bipolar name="phase0" description="zero-degree shaped output"/>
+         <frac32.bipolar name="phase90" description="quarter-cycle shaped output"/>
+         <frac32.bipolar name="phase180" description="half-cycle shaped output"/>
+         <frac32.bipolar name="phase270" description="three-quarter-cycle shaped output"/>
+         <bool32 name="eoc" description="one-block end-of-cycle pulse"/>
+      </outlets>
+      <params>
+         <frac32.u.map name="rate" description="free-running rate with cubic low-frequency resolution"/>
+         <frac32.u.map name="shape" description="logarithmic through linear to exponential curvature"/>
+         <frac32.u.map name="slope" description="rise/fall time balance"/>
+         <frac32.u.map name="smooth" description="linear corners through smoothstep transitions"/>
+         <bool32.tgl name="clocked" description="use the measured external-clock period"/>
+      </params>
+      <attribs/>
+      <includes>
+         <include>./poly_slope_dsp.h</include>
+      </includes>
+      <code.declaration><![CDATA[KsolotiExtendedPolySlopeDSP engine;]]></code.declaration>
+      <code.init><![CDATA[engine.Init();]]></code.init>
+      <code.krate><![CDATA[engine.Process(inlet_clock, inlet_reset, inlet_rate, inlet_shape, inlet_slope, inlet_smooth, param_rate, param_shape, param_slope, param_smooth, param_clocked, outlet_phase0, outlet_phase90, outlet_phase180, outlet_phase270, outlet_eoc, BUFSIZE);]]></code.krate>
+   </obj.normal>
+</objdefs>

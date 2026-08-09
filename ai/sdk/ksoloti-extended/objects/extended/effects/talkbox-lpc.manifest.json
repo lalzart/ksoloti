@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "stable_id": "com.lalzart.ksoloti.extended.effects.talkbox-lpc",
+  "id": "talkbox-lpc",
+  "uuid": "f5e2bf4f-1349-5635-871a-26ab43eb0a6a",
+  "description": "Linear-predictive cross-synthesis: a rolling speech/formant model from the modulator shapes a carrier. Distinct from a channel vocoder. Tags: effect, LPC, talkbox, cross-synthesis, formant, external-audio, heavy.",
+  "author": "Lance Ship",
+  "license": "GPL-3.0-or-later",
+  "ports": {"inlets": [{"name": "carrier", "type": "frac32buffer.bipolar", "description": "pitched or noisy excitation"}, {"name": "modulator", "type": "frac32buffer.bipolar", "description": "speech or formant source"}], "outlets": [{"name": "output", "type": "frac32buffer.bipolar", "description": "cross-synthesized output"}]},
+  "parameters": [
+    {"id": "com.lalzart.ksoloti.extended.effects.talkbox-lpc.order", "name": "order", "type": "int32", "default": "10", "minimum": 4, "maximum": 12},
+    {"id": "com.lalzart.ksoloti.extended.effects.talkbox-lpc.wet", "name": "wet", "type": "frac32.u.map", "default": "64"},
+    {"id": "com.lalzart.ksoloti.extended.effects.talkbox-lpc.preemphasis", "name": "preemphasis", "type": "frac32.u.map", "default": "56"}
+  ],
+  "implementation": {"header": "talkbox_lpc_dsp.h", "class_name": "KsolotiExtendedTalkboxLPCDSP", "instance_name": "engine", "init_method": "Init", "process_method": "Process", "rate": "krate", "arguments": ["inlet_carrier", "inlet_modulator", "param_order", "param_wet", "param_preemphasis", "outlet_output", "BUFSIZE"]},
+  "resources": {"max_voices": 1, "state_bytes": 1144, "scratch_bytes": 208, "bounded_work_per_block": 28672},
+  "compatibility": {"tier": "core-heavy", "build_status": "offline-verified", "tested_targets": ["host-c++17", "ksoloti-core@1.1.0"], "notes": "Portable tests and the combined audio-effects Cortex-M4 link passed; autocorrelation CPU and audible stability still require board profiling."},
+  "tests": ["silence-finite", "order-bound", "dry-path", "voiced-formant-energy", "coefficient-stability"]
+}

@@ -1,0 +1,29 @@
+<objdefs appVersion="1.1.0">
+   <obj.normal id="talkbox-lpc" uuid="f5e2bf4f-1349-5635-871a-26ab43eb0a6a">
+      <sDescription>Linear-predictive cross-synthesis: a rolling speech/formant model from the modulator shapes a carrier. Distinct from a channel vocoder. Tags: effect, LPC, talkbox, cross-synthesis, formant, external-audio, heavy.</sDescription>
+      <author>Lance Ship</author>
+      <license>GPL-3.0-or-later</license>
+      <inlets>
+         <frac32buffer.bipolar name="carrier" description="pitched or noisy excitation"/>
+         <frac32buffer.bipolar name="modulator" description="speech or formant source"/>
+      </inlets>
+      <outlets>
+         <frac32buffer.bipolar name="output" description="cross-synthesized output"/>
+      </outlets>
+      <params>
+         <int32 name="order">
+            <MinValue i="4"/>
+            <MaxValue i="12"/>
+         </int32>
+         <frac32.u.map name="wet"/>
+         <frac32.u.map name="preemphasis"/>
+      </params>
+      <attribs/>
+      <includes>
+         <include>./talkbox_lpc_dsp.h</include>
+      </includes>
+      <code.declaration><![CDATA[KsolotiExtendedTalkboxLPCDSP engine;]]></code.declaration>
+      <code.init><![CDATA[engine.Init();]]></code.init>
+      <code.krate><![CDATA[engine.Process(inlet_carrier, inlet_modulator, param_order, param_wet, param_preemphasis, outlet_output, BUFSIZE);]]></code.krate>
+   </obj.normal>
+</objdefs>

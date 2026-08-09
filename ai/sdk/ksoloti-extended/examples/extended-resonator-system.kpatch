@@ -1,0 +1,58 @@
+# A deterministic generative system using the Ksoloti Extended Library.
+kpatch 1
+patch extended-resonator-system
+target ksoloti-core@1.1.0
+
+node clock axoloti-factory:lfo/square
+node rhythm ksoloti-extended:extended/sequencing/topographic-3
+node variation ksoloti-extended:extended/random/probability-router
+node memory ksoloti-extended:extended/random/loop-mutate
+node motion ksoloti-extended:extended/modulation/poly-slope
+node motion_depth axoloti-factory:math/*c
+node body ksoloti-extended:extended/physical/resonator
+node out "axoloti-factory:audio/out stereo"
+
+param clock.pitch -28
+param rhythm.x 19
+param rhythm.y 43
+param rhythm.density1 34
+param rhythm.density2 24
+param rhythm.density3 46
+param rhythm.chaos 6
+param rhythm.seed 17
+param variation.probability 20
+param variation.seed 31
+param memory.memory 58
+param memory.spread 7
+param memory.bias 0
+param memory.length 7
+param memory.seed 23
+param motion.shape 38
+param motion.slope 27
+param motion.smooth 42
+param motion.clocked 1
+param motion_depth.amp 3
+param body.pitch 0
+param body.structure 26
+param body.brightness 41
+param body.damping 43
+param body.position 22
+param body.model 0
+param body.voices 2
+param body.external 0
+
+connect clock.wave -> rhythm.clock,memory.clock,motion.clock
+connect rhythm.part1 -> body.strum
+connect rhythm.part2 -> variation.trigger
+connect variation.a -> memory.reset
+connect memory.value -> body.pitch
+connect motion.phase90 -> motion_depth.in
+connect motion_depth.out -> body.structure
+connect body.output -> out.left
+connect body.aux -> out.right
+
+assert startup=silent
+assert random=seeded
+assert rhythm=bounded-32-step
+assert output=finite
+assert target-profile=required

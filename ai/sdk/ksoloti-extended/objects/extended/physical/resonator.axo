@@ -1,0 +1,43 @@
+<objdefs appVersion="1.1.0">
+   <obj.normal id="resonator" uuid="f0bd4354-c264-5cdb-b976-4859d0ef1958">
+      <sDescription>Polyphonic physical resonator with modal, sympathetic-string, and dispersive-string models. It accepts external audio excitation or generates an internal pluck on a rising strum, and returns complementary main and auxiliary responses. Uses the MIT-licensed Rings DSP carried by Ksoloti. Tags: physical-model, resonator, modal, string, exciter, polyphonic, stereo-pair, heavy.</sDescription>
+      <author>Lance Ship; DSP by Emilie Gillet</author>
+      <license>GPL-3.0-or-later wrapper; MIT DSP</license>
+      <inlets>
+         <frac32buffer name="input" description="external audio excitation"/>
+         <bool32 name="strum" description="excite or allocate a voice on rising edge"/>
+         <frac32.bipolar name="pitch" description="pitch modulation over plus or minus 64 semitones"/>
+         <frac32 name="structure" description="inharmonic structure modulation"/>
+         <frac32 name="brightness" description="exciter and resonator brightness modulation"/>
+         <frac32 name="damping" description="decay and absorption modulation"/>
+         <frac32 name="position" description="excitation and pickup position modulation"/>
+      </inlets>
+      <outlets>
+         <frac32buffer name="output" description="main response or odd modes"/>
+         <frac32buffer name="aux" description="auxiliary response or even modes"/>
+      </outlets>
+      <params>
+         <frac32.s.map name="pitch" description="pitch offset around MIDI note 60"/>
+         <frac32.u.map name="structure" description="inharmonic structure or string relationship"/>
+         <frac32.u.map name="brightness" description="excitation and partial brightness"/>
+         <frac32.u.map name="damping" description="decay and absorption"/>
+         <frac32.u.map name="position" description="excitation and pickup position"/>
+         <int32 name="model" description="0 modal, 1 sympathetic strings, 2 dispersive string">
+            <MinValue i="0"/>
+            <MaxValue i="2"/>
+         </int32>
+         <int32 name="voices" description="zero-based polyphony selection: 0 is one voice through 3 is four voices">
+            <MinValue i="0"/>
+            <MaxValue i="3"/>
+         </int32>
+         <bool32.tgl name="external" description="disable the internal pluck and use only the audio input"/>
+      </params>
+      <attribs/>
+      <includes>
+         <include>./physical_resonator_dsp.h</include>
+      </includes>
+      <code.declaration><![CDATA[KsolotiExtendedPhysicalResonatorDSP engine;]]></code.declaration>
+      <code.init><![CDATA[engine.Init();]]></code.init>
+      <code.krate><![CDATA[engine.Process(inlet_input, inlet_strum, inlet_pitch, inlet_structure, inlet_brightness, inlet_damping, inlet_position, param_pitch, param_structure, param_brightness, param_damping, param_position, param_model, param_voices, param_external, outlet_output, outlet_aux, BUFSIZE);]]></code.krate>
+   </obj.normal>
+</objdefs>

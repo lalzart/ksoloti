@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "stable_id": "com.lalzart.ksoloti.extended.effects.waveset-repeat",
+  "id": "waveset-repeat",
+  "uuid": "40a47278-7d5a-5db2-9ff3-4fbd7e0bc3b5",
+  "description": "Captures one to sixteen pairs of thresholded zero crossings and repeats that waveset a bounded number of times. Tags: effect, waveset, zero-crossing, repeat, glitch, audio-buffer.",
+  "author": "Lance Ship",
+  "license": "GPL-3.0-or-later",
+  "ports": {"inlets": [{"name": "input", "type": "frac32buffer.bipolar", "description": "audio to capture"}, {"name": "trigger", "type": "bool32", "description": "begin capture on rising edge"}], "outlets": [{"name": "output", "type": "frac32buffer.bipolar", "description": "dry/repeated mix"}, {"name": "capturing", "type": "bool32", "description": "capture state"}, {"name": "repeating", "type": "bool32", "description": "playback state"}]},
+  "parameters": [
+    {"id": "com.lalzart.ksoloti.extended.effects.waveset-repeat.cycles", "name": "cycles", "type": "int32", "default": "2", "minimum": 1, "maximum": 16},
+    {"id": "com.lalzart.ksoloti.extended.effects.waveset-repeat.repeats", "name": "repeats", "type": "int32", "default": "4", "minimum": 1, "maximum": 32},
+    {"id": "com.lalzart.ksoloti.extended.effects.waveset-repeat.threshold", "name": "threshold", "type": "frac32.u.map", "default": "1"},
+    {"id": "com.lalzart.ksoloti.extended.effects.waveset-repeat.mix", "name": "mix", "type": "frac32.u.map", "default": "64"}
+  ],
+  "implementation": {"header": "waveset_repeat_dsp.h", "class_name": "KsolotiExtendedWavesetRepeatDSP", "instance_name": "engine", "init_method": "Init", "process_method": "Process", "rate": "krate", "arguments": ["inlet_input", "inlet_trigger", "param_cycles", "param_repeats", "param_threshold", "param_mix", "outlet_output", "outlet_capturing", "outlet_repeating", "BUFSIZE"]},
+  "resources": {"max_voices": 1, "state_bytes": 16416, "scratch_bytes": 0, "bounded_work_per_block": 768},
+  "compatibility": {"tier": "core-heavy", "build_status": "offline-verified", "tested_targets": ["host-c++17", "ksoloti-core@1.1.0"], "notes": "Portable tests and the combined audio-effects Cortex-M4 link passed; the fixed capture buffer still requires combination-aware budgeting."},
+  "tests": ["triggered-capture", "crossing-boundary", "repeat-count", "capacity-bound", "dry-mix"]
+}

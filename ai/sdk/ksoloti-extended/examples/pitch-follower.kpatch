@@ -1,0 +1,25 @@
+# Monophonic external-audio pitch follower driving a sine monitor.
+kpatch 1
+patch extended-pitch-follower
+target ksoloti-core@1.1.0
+
+node input "axoloti-factory:audio/in left"
+node tracker ksoloti-extended:extended/analysis/pitch-amdf
+node monitor axoloti-factory:osc/sine
+node out "axoloti-factory:audio/out stereo"
+
+param tracker.minimum_frequency 50
+param tracker.maximum_frequency 1200
+param tracker.threshold 2
+param tracker.quality 16
+param tracker.smooth 24
+param monitor.pitch 0
+
+connect input.wave -> tracker.input
+connect tracker.pitch -> monitor.pitch
+connect monitor.wave -> out.left,out.right
+
+assert input=monophonic-periodic
+assert pitch=retained-when-invalid
+assert output=finite
+assert target-profile=required

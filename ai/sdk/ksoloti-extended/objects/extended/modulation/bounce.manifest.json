@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "stable_id": "com.lalzart.ksoloti.extended.modulation.bounce",
+  "id": "bounce",
+  "uuid": "968de957-4dbc-5f7d-b4dd-b58c3d5d7140",
+  "description": "Triggered bouncing-ball modulation with separate gravity, initial rebound, and per-impact loss. Tags: modulation, bouncing-ball, envelope, impact, physical-control.",
+  "author": "Lance Ship",
+  "license": "GPL-3.0-or-later",
+  "ports": {"inlets": [{"name": "trigger", "type": "bool32", "description": "launch on rising edge"}], "outlets": [{"name": "height", "type": "frac32", "description": "normalized ball height"}, {"name": "impact", "type": "bool32", "description": "one-block ground impact pulse"}, {"name": "active", "type": "bool32", "description": "true while the bounce is moving"}]},
+  "parameters": [
+    {"id": "com.lalzart.ksoloti.extended.modulation.bounce.gravity", "name": "gravity", "type": "frac32.u.map", "default": "32"},
+    {"id": "com.lalzart.ksoloti.extended.modulation.bounce.rebound", "name": "rebound", "type": "frac32.u.map", "default": "28"},
+    {"id": "com.lalzart.ksoloti.extended.modulation.bounce.loss", "name": "loss", "type": "frac32.u.map", "default": "18"}
+  ],
+  "implementation": {"header": "bounce_dsp.h", "class_name": "KsolotiExtendedBounceDSP", "instance_name": "engine", "init_method": "Init", "process_method": "Process", "rate": "krate", "arguments": ["inlet_trigger", "param_gravity", "param_rebound", "param_loss", "outlet_height", "outlet_impact", "outlet_active", "BUFSIZE"]},
+  "resources": {"max_voices": 1, "state_bytes": 12, "scratch_bytes": 0, "bounded_work_per_block": 64},
+  "compatibility": {"tier": "core", "build_status": "offline-verified", "tested_targets": ["host-c++17", "ksoloti-core@1.1.0"], "notes": "Portable tests and the combined control-scenes Cortex-M4 link passed."},
+  "tests": ["rising-edge-launch", "bounded-height", "decaying-impacts", "eventual-rest"]
+}

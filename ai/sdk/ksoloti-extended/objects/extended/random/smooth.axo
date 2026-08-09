@@ -1,0 +1,31 @@
+<objdefs appVersion="1.1.0">
+   <obj.normal id="smooth" uuid="2a072f9d-8ab2-586f-ae9d-3d486e49b65c">
+      <sDescription>Continuously interpolated seeded bipolar random modulation, free-running or advanced by external clock. Tags: random, smooth, modulation, seedable, clocked, deterministic.</sDescription>
+      <author>Lance Ship</author>
+      <license>GPL-3.0-or-later</license>
+      <inlets>
+         <bool32 name="clock" description="choose a new target on rising edge in clocked mode"/>
+         <bool32 name="reset" description="restart seeded sequence"/>
+      </inlets>
+      <outlets>
+         <frac32.bipolar name="output" description="interpolated bipolar value"/>
+         <frac32.bipolar name="raw" description="current random target"/>
+      </outlets>
+      <params>
+         <frac32.u.map name="rate"/>
+         <frac32.u.map name="smooth"/>
+         <int32 name="seed">
+            <MinValue i="-2147483648"/>
+            <MaxValue i="2147483647"/>
+         </int32>
+         <bool32.tgl name="clocked"/>
+      </params>
+      <attribs/>
+      <includes>
+         <include>./smooth_random_dsp.h</include>
+      </includes>
+      <code.declaration><![CDATA[KsolotiExtendedSmoothRandomDSP engine;]]></code.declaration>
+      <code.init><![CDATA[engine.Init();]]></code.init>
+      <code.krate><![CDATA[engine.Process(inlet_clock, inlet_reset, param_rate, param_smooth, param_seed, param_clocked, outlet_output, outlet_raw, BUFSIZE);]]></code.krate>
+   </obj.normal>
+</objdefs>

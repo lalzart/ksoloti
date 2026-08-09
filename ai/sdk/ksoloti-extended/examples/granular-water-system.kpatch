@@ -1,0 +1,39 @@
+# Seeded physical droplets feeding both granular processors.
+kpatch 1
+patch extended-granular-water-system
+target ksoloti-core@1.1.0
+
+node clock axoloti-factory:lfo/square
+node water ksoloti-extended:extended/physical/drip-water
+node scatter ksoloti-extended:extended/grain/seeded-scatter
+node delay ksoloti-extended:extended/grain/clocked-delay
+node out "axoloti-factory:audio/out stereo"
+
+param clock.pitch -27
+param water.activity 18
+param water.damping 42
+param water.brightness 36
+param water.spread 38
+param water.seed 11
+param scatter.density 14
+param scatter.size 28
+param scatter.pitch 21
+param scatter.spread 48
+param scatter.feedback 10
+param scatter.seed 23
+param delay.delay 34
+param delay.size 30
+param delay.pitch 21
+param delay.feedback 16
+param delay.freeze 0
+
+connect clock.wave -> water.trigger,scatter.trigger,delay.clock
+connect water.output -> scatter.input
+connect scatter.left -> delay.input
+connect delay.left -> out.left
+connect delay.right -> out.right
+
+assert random=seeded
+assert grains=bounded-four-voices
+assert feedback=bounded
+assert target-profile=required

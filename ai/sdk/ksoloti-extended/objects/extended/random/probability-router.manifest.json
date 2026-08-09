@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "stable_id": "com.lalzart.ksoloti.extended.random.probability-router",
+  "id": "probability-router",
+  "uuid": "f43d6cee-90ef-53a9-a8d3-b021d39794db",
+  "description": "Seeded complementary probability router. A rising trigger produces a one-block pulse on exactly one output; probability 0 always selects B, probability 64 always selects A, and choice retains the last decision. Tags: random, Bernoulli, gate, complementary, deterministic, seedable.",
+  "author": "Lance Ship",
+  "license": "GPL-3.0-or-later",
+  "ports": {
+    "inlets": [
+      {"name": "trigger", "type": "bool32", "description": "decision on rising edge"}
+    ],
+    "outlets": [
+      {"name": "a", "type": "bool32", "description": "selected-A one-block pulse"},
+      {"name": "b", "type": "bool32", "description": "selected-B one-block pulse"},
+      {"name": "choice", "type": "bool32", "description": "retained last decision; true is A"}
+    ]
+  },
+  "parameters": [
+    {"id": "com.lalzart.ksoloti.extended.random.probability-router.probability", "name": "probability", "type": "frac32.u.map", "default": "32", "description": "probability of selecting A"},
+    {"id": "com.lalzart.ksoloti.extended.random.probability-router.seed", "name": "seed", "type": "int32", "default": "1", "minimum": -2147483648, "maximum": 2147483647, "description": "deterministic sequence seed"}
+  ],
+  "implementation": {
+    "header": "probability_router_dsp.h",
+    "class_name": "KsolotiExtendedProbabilityRouterDSP",
+    "instance_name": "engine",
+    "init_method": "Init",
+    "process_method": "Process",
+    "rate": "krate",
+    "arguments": ["inlet_trigger", "param_probability", "param_seed", "outlet_a", "outlet_b", "outlet_choice"]
+  },
+  "resources": {"max_voices": 1, "state_bytes": 12, "scratch_bytes": 0, "bounded_work_per_block": 32},
+  "compatibility": {"tier": "core", "build_status": "offline-verified", "tested_targets": ["host-c++17", "ksoloti-core@1.1.0"], "notes": "Portable behavior tests and the combined Cortex-M4 target link passed."},
+  "tests": ["edge-only", "complementary-outputs", "probability-extremes", "seed-repeatability"]
+}

@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "stable_id": "com.lalzart.ksoloti.extended.modulation.segment-6",
+  "id": "segment-6",
+  "uuid": "4cd1a718-f99c-505a-9f4a-5b86f2d8d0e5",
+  "description": "Six chained ramp segments for envelopes, looping modulation, stepped sequences, and held stages. Each segment has an independent target and duration. Tags: modulation, envelope, function-generator, sequencer, slew, loopable.",
+  "author": "Lance Ship",
+  "license": "GPL-3.0-or-later",
+  "ports": {
+    "inlets": [
+      {"name": "trigger", "type": "bool32", "description": "restart segment one on a rising edge"},
+      {"name": "gate", "type": "bool32", "description": "hold at the selected sustain segment"},
+      {"name": "rate", "type": "frac32", "description": "global positive speed modulation"}
+    ],
+    "outlets": [
+      {"name": "output", "type": "frac32", "description": "current segment value"},
+      {"name": "eoc", "type": "bool32", "description": "one-block end-of-chain pulse"},
+      {"name": "segment", "type": "int32", "description": "active zero-based segment"}
+    ]
+  },
+  "parameters": [
+    {"id": "com.lalzart.ksoloti.extended.modulation.segment-6.level1", "name": "level1", "type": "frac32.u.map", "default": "64"},
+    {"id": "com.lalzart.ksoloti.extended.modulation.segment-6.level2", "name": "level2", "type": "frac32.u.map", "default": "40"},
+    {"id": "com.lalzart.ksoloti.extended.modulation.segment-6.level3", "name": "level3", "type": "frac32.u.map", "default": "40"},
+    {"id": "com.lalzart.ksoloti.extended.modulation.segment-6.level4", "name": "level4", "type": "frac32.u.map", "default": "16"},
+    {"id": "com.lalzart.ksoloti.extended.modulation.segment-6.level5", "name": "level5", "type": "frac32.u.map", "default": "48"},
+    {"id": "com.lalzart.ksoloti.extended.modulation.segment-6.level6", "name": "level6", "type": "frac32.u.map", "default": "0"},
+    {"id": "com.lalzart.ksoloti.extended.modulation.segment-6.time1", "name": "time1", "type": "frac32.u.map", "default": "12"},
+    {"id": "com.lalzart.ksoloti.extended.modulation.segment-6.time2", "name": "time2", "type": "frac32.u.map", "default": "24"},
+    {"id": "com.lalzart.ksoloti.extended.modulation.segment-6.time3", "name": "time3", "type": "frac32.u.map", "default": "32"},
+    {"id": "com.lalzart.ksoloti.extended.modulation.segment-6.time4", "name": "time4", "type": "frac32.u.map", "default": "20"},
+    {"id": "com.lalzart.ksoloti.extended.modulation.segment-6.time5", "name": "time5", "type": "frac32.u.map", "default": "16"},
+    {"id": "com.lalzart.ksoloti.extended.modulation.segment-6.time6", "name": "time6", "type": "frac32.u.map", "default": "28"},
+    {"id": "com.lalzart.ksoloti.extended.modulation.segment-6.shape", "name": "shape", "type": "frac32.u.map", "default": "24", "description": "linear through smooth to stepped"},
+    {"id": "com.lalzart.ksoloti.extended.modulation.segment-6.sustain", "name": "sustain", "type": "int32", "default": "2", "minimum": 0, "maximum": 5, "description": "segment held while gate is high"},
+    {"id": "com.lalzart.ksoloti.extended.modulation.segment-6.loop", "name": "loop", "type": "bool32.tgl", "default": "0", "description": "restart after segment six"}
+  ],
+  "implementation": {
+    "header": "segment_6_dsp.h", "class_name": "KsolotiExtendedSegment6DSP", "instance_name": "engine",
+    "init_method": "Init", "process_method": "Process", "rate": "krate",
+    "arguments": ["inlet_trigger", "inlet_gate", "inlet_rate", "param_level1", "param_level2", "param_level3", "param_level4", "param_level5", "param_level6", "param_time1", "param_time2", "param_time3", "param_time4", "param_time5", "param_time6", "param_shape", "param_sustain", "param_loop", "outlet_output", "outlet_eoc", "outlet_segment", "BUFSIZE"]
+  },
+  "resources": {"max_voices": 1, "state_bytes": 24, "scratch_bytes": 0, "bounded_work_per_block": 160},
+  "compatibility": {"tier": "core", "build_status": "offline-verified", "tested_targets": ["host-c++17", "ksoloti-core@1.1.0"], "notes": "Portable tests and the combined control-scenes Cortex-M4 link passed."},
+  "tests": ["rising-edge-restart", "six-segment-order", "sustain-hold", "loop-eoc"]
+}

@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "stable_id": "com.lalzart.ksoloti.extended.synthesis.macro-voice",
+  "id": "macro-voice",
+  "uuid": "63167466-40c4-5481-b902-290802592755",
+  "description": "Complete 24-engine Plaits macro voice with main and auxiliary outputs, internal trigger envelope and low-pass gate, optional drone and external-level modes, and modulation of pitch, harmonics, timbre, and morph. Engines 0-7 are the later virtual-analog-filter, phase-distortion, six-operator FM, wave-terrain, string-machine, and chiptune additions; engines 8-23 are the original tonal, noise, physical, and percussion models. Tags: synthesis, macro-voice, 24-engine, speech, FM, physical-model, percussion, Plaits-DSP, very-heavy.",
+  "author": "Lance Ship; DSP by Emilie Gillet",
+  "license": "GPL-3.0-or-later wrapper; MIT DSP",
+  "ports": {
+    "inlets": [
+      {"name": "trigger", "type": "bool32", "description": "internal envelope and percussion trigger"},
+      {"name": "engine", "type": "int32", "description": "signed model offset"},
+      {"name": "pitch", "type": "frac32.bipolar", "description": "Ksoloti pitch modulation in semitone units"},
+      {"name": "harmonics", "type": "frac32.bipolar", "description": "signed harmonics modulation"},
+      {"name": "timbre", "type": "frac32.bipolar", "description": "signed timbre modulation"},
+      {"name": "morph", "type": "frac32.bipolar", "description": "signed morph modulation"},
+      {"name": "frequency", "type": "frac32.bipolar", "description": "signed frequency-modulation signal"},
+      {"name": "level", "type": "frac32", "description": "external level when enabled"}
+    ],
+    "outlets": [
+      {"name": "output", "type": "frac32buffer.bipolar", "description": "main engine output"},
+      {"name": "aux", "type": "frac32buffer.bipolar", "description": "auxiliary engine output"}
+    ]
+  },
+  "parameters": [
+    {"id": "com.lalzart.ksoloti.extended.synthesis.macro-voice.engine", "name": "engine", "type": "int32", "default": "8", "minimum": 0, "maximum": 23, "description": "complete Plaits engine index"},
+    {"id": "com.lalzart.ksoloti.extended.synthesis.macro-voice.pitch", "name": "pitch", "type": "frac32.s.map", "default": "0", "description": "pitch around E4 in Ksoloti units"},
+    {"id": "com.lalzart.ksoloti.extended.synthesis.macro-voice.harmonics", "name": "harmonics", "type": "frac32.u.map", "default": "32"},
+    {"id": "com.lalzart.ksoloti.extended.synthesis.macro-voice.timbre", "name": "timbre", "type": "frac32.u.map", "default": "32"},
+    {"id": "com.lalzart.ksoloti.extended.synthesis.macro-voice.morph", "name": "morph", "type": "frac32.u.map", "default": "32"},
+    {"id": "com.lalzart.ksoloti.extended.synthesis.macro-voice.frequency-modulation", "name": "frequency_modulation", "type": "frac32.s.map", "default": "0"},
+    {"id": "com.lalzart.ksoloti.extended.synthesis.macro-voice.timbre-modulation", "name": "timbre_modulation", "type": "frac32.s.map", "default": "0"},
+    {"id": "com.lalzart.ksoloti.extended.synthesis.macro-voice.morph-modulation", "name": "morph_modulation", "type": "frac32.s.map", "default": "0"},
+    {"id": "com.lalzart.ksoloti.extended.synthesis.macro-voice.decay", "name": "decay", "type": "frac32.u.map", "default": "32"},
+    {"id": "com.lalzart.ksoloti.extended.synthesis.macro-voice.lpg-colour", "name": "lpg_colour", "type": "frac32.u.map", "default": "32"},
+    {"id": "com.lalzart.ksoloti.extended.synthesis.macro-voice.drone", "name": "drone", "type": "bool32.tgl", "default": "0"},
+    {"id": "com.lalzart.ksoloti.extended.synthesis.macro-voice.external-level", "name": "external_level", "type": "bool32.tgl", "default": "0"}
+  ],
+  "implementation": {
+    "header": "macro_voice_dsp.h", "class_name": "KsolotiExtendedMacroVoiceDSP", "instance_name": "engine",
+    "init_method": "Init", "process_method": "Process", "rate": "krate",
+    "arguments": ["inlet_trigger", "inlet_engine", "inlet_pitch", "inlet_harmonics", "inlet_timbre", "inlet_morph", "inlet_frequency", "inlet_level", "param_engine", "param_pitch", "param_harmonics", "param_timbre", "param_morph", "param_frequency_modulation", "param_timbre_modulation", "param_morph_modulation", "param_decay", "param_lpg_colour", "param_drone", "param_external_level", "outlet_output", "outlet_aux", "BUFSIZE"]
+  },
+  "resources": {"max_voices": 1, "state_bytes": 27448, "scratch_bytes": 0, "bounded_work_per_block": 65536},
+  "compatibility": {"tier": "h7-recommended", "build_status": "build-failed", "tested_targets": ["host-c++17", "ksoloti-core@1.1.0"], "notes": "All 24 engines pass the portable finite-output sweep, but the complete Core patch needs 188048 bytes of the 45056-byte SRAM1 code region (417.37 percent). Use an H7 port, custom firmware prelink, or future split banks."},
+  "tests": ["all-24-engines-finite", "main-and-aux-output", "trigger-envelope", "drone-mode", "engine-bound", "target-code-size-report"]
+}

@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "stable_id": "com.lalzart.ksoloti.extended.random.loop-mutate",
+  "id": "loop-mutate",
+  "uuid": "50d2f060-3ad1-5b9f-9238-d52bffaf7b5f",
+  "description": "Seeded 1-to-16-step random memory. On each rising clock, memory controls the probability of replaying the current slot: 0 produces fresh values, 64 locks a repeatable loop, and intermediate values make bounded mutations. Spread and bias reshape the stored loop without destroying it. Tags: random, loop, mutation, stepped-CV, deterministic, seedable, generative.",
+  "author": "Lance Ship",
+  "license": "GPL-3.0-or-later",
+  "ports": {
+    "inlets": [
+      {"name": "clock", "type": "bool32", "description": "advance on rising edge"},
+      {"name": "reset", "type": "bool32", "description": "return to the first memory slot on rising edge"}
+    ],
+    "outlets": [
+      {"name": "value", "type": "frac32.bipolar", "description": "current stored random value"},
+      {"name": "fresh", "type": "bool32", "description": "one-block pulse when a slot mutates"},
+      {"name": "step", "type": "int32", "description": "zero-based memory position"}
+    ]
+  },
+  "parameters": [
+    {"id": "com.lalzart.ksoloti.extended.random.loop-mutate.memory", "name": "memory", "type": "frac32.u.map", "default": "32", "description": "probability of replaying rather than replacing a slot"},
+    {"id": "com.lalzart.ksoloti.extended.random.loop-mutate.spread", "name": "spread", "type": "frac32.u.map", "default": "48", "description": "output range around the bias"},
+    {"id": "com.lalzart.ksoloti.extended.random.loop-mutate.bias", "name": "bias", "type": "frac32.s.map", "default": "0", "description": "output offset"},
+    {"id": "com.lalzart.ksoloti.extended.random.loop-mutate.length", "name": "length", "type": "int32", "default": "8", "minimum": 1, "maximum": 16, "description": "loop length"},
+    {"id": "com.lalzart.ksoloti.extended.random.loop-mutate.seed", "name": "seed", "type": "int32", "default": "1", "minimum": -2147483648, "maximum": 2147483647, "description": "deterministic sequence seed"}
+  ],
+  "implementation": {
+    "header": "loop_mutate_dsp.h",
+    "class_name": "KsolotiExtendedLoopMutateDSP",
+    "instance_name": "engine",
+    "init_method": "Init",
+    "process_method": "Process",
+    "rate": "krate",
+    "arguments": ["inlet_clock", "inlet_reset", "param_memory", "param_spread", "param_bias", "param_length", "param_seed", "outlet_value", "outlet_fresh", "outlet_step"]
+  },
+  "resources": {"max_voices": 1, "state_bytes": 80, "scratch_bytes": 0, "bounded_work_per_block": 128},
+  "compatibility": {"tier": "core", "build_status": "offline-verified", "tested_targets": ["host-c++17", "ksoloti-core@1.1.0"], "notes": "Portable behavior tests and the combined Cortex-M4 target link passed."},
+  "tests": ["edge-only", "locked-loop", "fresh-stream", "length-bound", "seed-repeatability", "output-bound"]
+}

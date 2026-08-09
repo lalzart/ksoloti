@@ -1,0 +1,27 @@
+<objdefs appVersion="1.1.0">
+   <obj.normal id="bounce" uuid="968de957-4dbc-5f7d-b4dd-b58c3d5d7140">
+      <sDescription>Triggered bouncing-ball modulation with separate gravity, initial rebound, and per-impact loss. Tags: modulation, bouncing-ball, envelope, impact, physical-control.</sDescription>
+      <author>Lance Ship</author>
+      <license>GPL-3.0-or-later</license>
+      <inlets>
+         <bool32 name="trigger" description="launch on rising edge"/>
+      </inlets>
+      <outlets>
+         <frac32 name="height" description="normalized ball height"/>
+         <bool32 name="impact" description="one-block ground impact pulse"/>
+         <bool32 name="active" description="true while the bounce is moving"/>
+      </outlets>
+      <params>
+         <frac32.u.map name="gravity"/>
+         <frac32.u.map name="rebound"/>
+         <frac32.u.map name="loss"/>
+      </params>
+      <attribs/>
+      <includes>
+         <include>./bounce_dsp.h</include>
+      </includes>
+      <code.declaration><![CDATA[KsolotiExtendedBounceDSP engine;]]></code.declaration>
+      <code.init><![CDATA[engine.Init();]]></code.init>
+      <code.krate><![CDATA[engine.Process(inlet_trigger, param_gravity, param_rebound, param_loss, outlet_height, outlet_impact, outlet_active, BUFSIZE);]]></code.krate>
+   </obj.normal>
+</objdefs>

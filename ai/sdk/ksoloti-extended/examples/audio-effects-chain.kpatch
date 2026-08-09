@@ -1,0 +1,37 @@
+# Waveset, LPC, and nested-comb external-audio processor.
+kpatch 1
+patch extended-audio-effects-chain
+target ksoloti-core@1.1.0
+
+node input "axoloti-factory:audio/in left"
+node clock axoloti-factory:lfo/square
+node waveset ksoloti-extended:extended/effects/waveset-repeat
+node talkbox ksoloti-extended:extended/effects/talkbox-lpc
+node space ksoloti-extended:extended/effects/comb-network
+node out "axoloti-factory:audio/out stereo"
+
+param clock.pitch -28
+param waveset.cycles 2
+param waveset.repeats 4
+param waveset.threshold 1
+param waveset.mix 48
+param talkbox.order 10
+param talkbox.wet 56
+param talkbox.preemphasis 56
+param space.size 40
+param space.feedback 46
+param space.damping 28
+param space.spread 42
+param space.mix 34
+
+connect input.wave -> waveset.input,talkbox.modulator
+connect clock.wave -> waveset.trigger
+connect waveset.output -> talkbox.carrier
+connect talkbox.output -> space.input
+connect space.left -> out.left
+connect space.right -> out.right
+
+assert capture=bounded-4096-samples
+assert lpc=order-4-through-12
+assert feedback=bounded
+assert target-profile=required

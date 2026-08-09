@@ -1,0 +1,45 @@
+<objdefs appVersion="1.1.0">
+   <obj.normal id="macro-voice" uuid="63167466-40c4-5481-b902-290802592755">
+      <sDescription>Complete 24-engine Plaits macro voice with main and auxiliary outputs, internal trigger envelope and low-pass gate, optional drone and external-level modes, and modulation of pitch, harmonics, timbre, and morph. Engines 0-7 are the later virtual-analog-filter, phase-distortion, six-operator FM, wave-terrain, string-machine, and chiptune additions; engines 8-23 are the original tonal, noise, physical, and percussion models. Tags: synthesis, macro-voice, 24-engine, speech, FM, physical-model, percussion, Plaits-DSP, very-heavy.</sDescription>
+      <author>Lance Ship; DSP by Emilie Gillet</author>
+      <license>GPL-3.0-or-later wrapper; MIT DSP</license>
+      <inlets>
+         <bool32 name="trigger" description="internal envelope and percussion trigger"/>
+         <int32 name="engine" description="signed model offset"/>
+         <frac32.bipolar name="pitch" description="Ksoloti pitch modulation in semitone units"/>
+         <frac32.bipolar name="harmonics" description="signed harmonics modulation"/>
+         <frac32.bipolar name="timbre" description="signed timbre modulation"/>
+         <frac32.bipolar name="morph" description="signed morph modulation"/>
+         <frac32.bipolar name="frequency" description="signed frequency-modulation signal"/>
+         <frac32 name="level" description="external level when enabled"/>
+      </inlets>
+      <outlets>
+         <frac32buffer.bipolar name="output" description="main engine output"/>
+         <frac32buffer.bipolar name="aux" description="auxiliary engine output"/>
+      </outlets>
+      <params>
+         <int32 name="engine" description="complete Plaits engine index">
+            <MinValue i="0"/>
+            <MaxValue i="23"/>
+         </int32>
+         <frac32.s.map name="pitch" description="pitch around E4 in Ksoloti units"/>
+         <frac32.u.map name="harmonics"/>
+         <frac32.u.map name="timbre"/>
+         <frac32.u.map name="morph"/>
+         <frac32.s.map name="frequency_modulation"/>
+         <frac32.s.map name="timbre_modulation"/>
+         <frac32.s.map name="morph_modulation"/>
+         <frac32.u.map name="decay"/>
+         <frac32.u.map name="lpg_colour"/>
+         <bool32.tgl name="drone"/>
+         <bool32.tgl name="external_level"/>
+      </params>
+      <attribs/>
+      <includes>
+         <include>./macro_voice_dsp.h</include>
+      </includes>
+      <code.declaration><![CDATA[KsolotiExtendedMacroVoiceDSP engine;]]></code.declaration>
+      <code.init><![CDATA[engine.Init();]]></code.init>
+      <code.krate><![CDATA[engine.Process(inlet_trigger, inlet_engine, inlet_pitch, inlet_harmonics, inlet_timbre, inlet_morph, inlet_frequency, inlet_level, param_engine, param_pitch, param_harmonics, param_timbre, param_morph, param_frequency__modulation, param_timbre__modulation, param_morph__modulation, param_decay, param_lpg__colour, param_drone, param_external__level, outlet_output, outlet_aux, BUFSIZE);]]></code.krate>
+   </obj.normal>
+</objdefs>

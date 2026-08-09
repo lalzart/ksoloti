@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "stable_id": "com.lalzart.ksoloti.extended.modulation.poly-slope",
+  "id": "poly-slope",
+  "uuid": "6a914841-7f30-55e2-bf7b-16995393e623",
+  "description": "Four phase-related bipolar modulation outputs with continuously variable rise/fall balance, curvature, and smoothing. It free-runs from 0.02 to 40 Hz or measures an external clock and locks one cycle to its period. Outputs are control-rate and deterministic. Tags: modulation, function-generator, LFO, clock-sync, quadrature, bounded.",
+  "author": "Lance Ship",
+  "license": "GPL-3.0-or-later",
+  "ports": {
+    "inlets": [
+      {"name": "clock", "type": "bool32", "description": "period measurement and phase restart on rising edge when clocked"},
+      {"name": "reset", "type": "bool32", "description": "phase reset on rising edge"},
+      {"name": "rate", "type": "frac32", "description": "positive rate modulation"},
+      {"name": "shape", "type": "frac32", "description": "positive curvature modulation"},
+      {"name": "slope", "type": "frac32", "description": "positive rise/fall balance modulation"},
+      {"name": "smooth", "type": "frac32", "description": "positive corner smoothing modulation"}
+    ],
+    "outlets": [
+      {"name": "phase0", "type": "frac32.bipolar", "description": "zero-degree shaped output"},
+      {"name": "phase90", "type": "frac32.bipolar", "description": "quarter-cycle shaped output"},
+      {"name": "phase180", "type": "frac32.bipolar", "description": "half-cycle shaped output"},
+      {"name": "phase270", "type": "frac32.bipolar", "description": "three-quarter-cycle shaped output"},
+      {"name": "eoc", "type": "bool32", "description": "one-block end-of-cycle pulse"}
+    ]
+  },
+  "parameters": [
+    {"id": "com.lalzart.ksoloti.extended.modulation.poly-slope.rate", "name": "rate", "type": "frac32.u.map", "default": "20", "description": "free-running rate with cubic low-frequency resolution"},
+    {"id": "com.lalzart.ksoloti.extended.modulation.poly-slope.shape", "name": "shape", "type": "frac32.u.map", "default": "32", "description": "logarithmic through linear to exponential curvature"},
+    {"id": "com.lalzart.ksoloti.extended.modulation.poly-slope.slope", "name": "slope", "type": "frac32.u.map", "default": "32", "description": "rise/fall time balance"},
+    {"id": "com.lalzart.ksoloti.extended.modulation.poly-slope.smooth", "name": "smooth", "type": "frac32.u.map", "default": "32", "description": "linear corners through smoothstep transitions"},
+    {"id": "com.lalzart.ksoloti.extended.modulation.poly-slope.clocked", "name": "clocked", "type": "bool32.tgl", "default": "0", "description": "use the measured external-clock period"}
+  ],
+  "implementation": {
+    "header": "poly_slope_dsp.h",
+    "class_name": "KsolotiExtendedPolySlopeDSP",
+    "instance_name": "engine",
+    "init_method": "Init",
+    "process_method": "Process",
+    "rate": "krate",
+    "arguments": ["inlet_clock", "inlet_reset", "inlet_rate", "inlet_shape", "inlet_slope", "inlet_smooth", "param_rate", "param_shape", "param_slope", "param_smooth", "param_clocked", "outlet_phase0", "outlet_phase90", "outlet_phase180", "outlet_phase270", "outlet_eoc", "BUFSIZE"]
+  },
+  "resources": {"max_voices": 1, "state_bytes": 16, "scratch_bytes": 0, "bounded_work_per_block": 96},
+  "compatibility": {"tier": "core", "build_status": "offline-verified", "tested_targets": ["host-c++17", "ksoloti-core@1.1.0"], "notes": "Portable behavior tests and the combined Cortex-M4 target link passed."},
+  "tests": ["finite-bounded", "phase-offsets", "reset-edge", "clock-period-lock", "rate-bound"]
+}

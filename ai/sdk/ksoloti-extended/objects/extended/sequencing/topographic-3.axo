@@ -1,0 +1,41 @@
+<objdefs appVersion="1.1.0">
+   <obj.normal id="topographic-3" uuid="ff245214-3035-59b6-a885-868e0fe89930">
+      <sDescription>Three-channel 32-step rhythm sequencer that bilinearly interpolates a two-dimensional pattern map. X and Y move between related grooves, three densities reveal progressively more events, chaos perturbs thresholds once per pattern, and accents mark the strongest events. Uses GPL-3.0-or-later pattern data derived from Grids. Tags: sequencer, rhythm, drum, topographic, density, chaos, accent, seedable.</sDescription>
+      <author>Lance Ship; pattern data by Emilie Gillet</author>
+      <license>GPL-3.0-or-later</license>
+      <inlets>
+         <bool32 name="clock" description="advance one 32nd-pattern step on rising edge"/>
+         <bool32 name="reset" description="return to step zero on rising edge"/>
+         <frac32 name="x" description="positive horizontal map modulation"/>
+         <frac32 name="y" description="positive vertical map modulation"/>
+      </inlets>
+      <outlets>
+         <bool32 name="part1" description="first one-block rhythm pulse"/>
+         <bool32 name="part2" description="second one-block rhythm pulse"/>
+         <bool32 name="part3" description="third one-block rhythm pulse"/>
+         <bool32 name="accent1" description="strong first-part event"/>
+         <bool32 name="accent2" description="strong second-part event"/>
+         <bool32 name="accent3" description="strong third-part event"/>
+         <int32 name="step" description="evaluated zero-based step"/>
+      </outlets>
+      <params>
+         <frac32.u.map name="x" description="horizontal map coordinate"/>
+         <frac32.u.map name="y" description="vertical map coordinate"/>
+         <frac32.u.map name="density1" description="first-part density"/>
+         <frac32.u.map name="density2" description="second-part density"/>
+         <frac32.u.map name="density3" description="third-part density"/>
+         <frac32.u.map name="chaos" description="seeded per-pattern threshold perturbation"/>
+         <int32 name="seed" description="deterministic chaos seed">
+            <MinValue i="-2147483648"/>
+            <MaxValue i="2147483647"/>
+         </int32>
+      </params>
+      <attribs/>
+      <includes>
+         <include>./topographic_3_dsp.h</include>
+      </includes>
+      <code.declaration><![CDATA[KsolotiExtendedTopographic3DSP engine;]]></code.declaration>
+      <code.init><![CDATA[engine.Init();]]></code.init>
+      <code.krate><![CDATA[engine.Process(inlet_clock, inlet_reset, inlet_x, inlet_y, param_x, param_y, param_density1, param_density2, param_density3, param_chaos, param_seed, outlet_part1, outlet_part2, outlet_part3, outlet_accent1, outlet_accent2, outlet_accent3, outlet_step);]]></code.krate>
+   </obj.normal>
+</objdefs>

@@ -1,0 +1,29 @@
+<objdefs appVersion="1.1.0">
+   <obj.normal id="clocked-delay" uuid="2b23521f-90f0-535c-baf7-ee2dce7439af">
+      <sDescription>Clock-triggered four-voice granular delay with fixed delay position, grain size, pitch, freeze, alternating stereo placement, and bounded feedback. Tags: grain, clocked, delay, freeze, stereo, external-audio, very-heavy.</sDescription>
+      <author>Lance Ship</author>
+      <license>GPL-3.0-or-later</license>
+      <inlets>
+         <frac32buffer.bipolar name="input" description="audio written to delay memory"/>
+         <bool32 name="clock" description="spawn one grain on rising edge"/>
+      </inlets>
+      <outlets>
+         <frac32buffer.bipolar name="left" description="left grain mix"/>
+         <frac32buffer.bipolar name="right" description="right grain mix"/>
+      </outlets>
+      <params>
+         <frac32.u.map name="delay"/>
+         <frac32.u.map name="size"/>
+         <frac32.u.map name="pitch"/>
+         <frac32.u.map name="feedback"/>
+         <bool32.tgl name="freeze"/>
+      </params>
+      <attribs/>
+      <includes>
+         <include>./clocked_delay_dsp.h</include>
+      </includes>
+      <code.declaration><![CDATA[KsolotiExtendedClockedDelayDSP engine;]]></code.declaration>
+      <code.init><![CDATA[engine.Init();]]></code.init>
+      <code.krate><![CDATA[engine.Process(inlet_input, inlet_clock, param_delay, param_size, param_pitch, param_feedback, param_freeze, outlet_left, outlet_right, BUFSIZE);]]></code.krate>
+   </obj.normal>
+</objdefs>

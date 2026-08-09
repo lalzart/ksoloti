@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "stable_id": "com.lalzart.ksoloti.extended.analysis.pitch-amdf",
+  "id": "pitch-amdf",
+  "uuid": "b4facf5c-dc19-5ebe-a4a8-d4cf874592bc",
+  "description": "Monophonic average-magnitude-difference pitch and level tracker for external audio. It reports native Ksoloti pitch, smoothed mean-absolute level, AMDF confidence, and an explicit validity gate while retaining the last accepted pitch. Tags: analysis, pitch, AMDF, level, confidence, external-audio, monophonic.",
+  "author": "Lance Ship",
+  "license": "GPL-3.0-or-later",
+  "ports": {
+    "inlets": [{"name": "input", "type": "frac32buffer.bipolar", "description": "monophonic periodic audio"}],
+    "outlets": [
+      {"name": "pitch", "type": "frac32.bipolar", "description": "last accepted Ksoloti pitch; E4 is zero"},
+      {"name": "level", "type": "frac32", "description": "smoothed mean absolute input level"},
+      {"name": "confidence", "type": "frac32", "description": "normalized AMDF clarity"},
+      {"name": "valid", "type": "bool32", "description": "level and confidence both pass their thresholds"}
+    ]
+  },
+  "parameters": [
+    {"id": "com.lalzart.ksoloti.extended.analysis.pitch-amdf.minimum-frequency", "name": "minimum_frequency", "type": "int32", "default": "50", "minimum": 40, "maximum": 200, "description": "lowest tracked frequency in hertz"},
+    {"id": "com.lalzart.ksoloti.extended.analysis.pitch-amdf.maximum-frequency", "name": "maximum_frequency", "type": "int32", "default": "1200", "minimum": 400, "maximum": 2000, "description": "highest tracked frequency in hertz"},
+    {"id": "com.lalzart.ksoloti.extended.analysis.pitch-amdf.threshold", "name": "threshold", "type": "frac32.u.map", "default": "2", "description": "minimum mean-absolute level"},
+    {"id": "com.lalzart.ksoloti.extended.analysis.pitch-amdf.quality", "name": "quality", "type": "frac32.u.map", "default": "16", "description": "minimum AMDF confidence"},
+    {"id": "com.lalzart.ksoloti.extended.analysis.pitch-amdf.smooth", "name": "smooth", "type": "frac32.u.map", "default": "24", "description": "accepted-pitch smoothing"}
+  ],
+  "implementation": {
+    "header": "pitch_amdf_dsp.h", "class_name": "KsolotiExtendedPitchAMDFAudioDSP", "instance_name": "engine",
+    "init_method": "Init", "process_method": "Process", "rate": "krate",
+    "arguments": ["inlet_input", "param_minimum_frequency", "param_maximum_frequency", "param_threshold", "param_quality", "param_smooth", "outlet_pitch", "outlet_level", "outlet_confidence", "outlet_valid", "BUFSIZE"]
+  },
+  "resources": {"max_voices": 1, "state_bytes": 2104, "scratch_bytes": 0, "bounded_work_per_block": 12288},
+  "compatibility": {"tier": "core-heavy", "build_status": "offline-verified", "tested_targets": ["host-c++17", "ksoloti-core@1.1.0"], "notes": "Synthetic pitch tests and a dedicated Cortex-M4 link passed; connected-board CPU and tracking-latency profiling are still required."},
+  "tests": ["silence-invalid", "440hz-pitch", "220hz-pitch", "weak-signal-retains-pitch", "confidence-bound"]
+}

@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "stable_id": "com.lalzart.ksoloti.extended.sequencing.topographic-3",
+  "id": "topographic-3",
+  "uuid": "ff245214-3035-59b6-a885-868e0fe89930",
+  "description": "Three-channel 32-step rhythm sequencer that bilinearly interpolates a two-dimensional pattern map. X and Y move between related grooves, three densities reveal progressively more events, chaos perturbs thresholds once per pattern, and accents mark the strongest events. Uses GPL-3.0-or-later pattern data derived from Grids. Tags: sequencer, rhythm, drum, topographic, density, chaos, accent, seedable.",
+  "author": "Lance Ship; pattern data by Emilie Gillet",
+  "license": "GPL-3.0-or-later",
+  "ports": {
+    "inlets": [
+      {"name": "clock", "type": "bool32", "description": "advance one 32nd-pattern step on rising edge"},
+      {"name": "reset", "type": "bool32", "description": "return to step zero on rising edge"},
+      {"name": "x", "type": "frac32", "description": "positive horizontal map modulation"},
+      {"name": "y", "type": "frac32", "description": "positive vertical map modulation"}
+    ],
+    "outlets": [
+      {"name": "part1", "type": "bool32", "description": "first one-block rhythm pulse"},
+      {"name": "part2", "type": "bool32", "description": "second one-block rhythm pulse"},
+      {"name": "part3", "type": "bool32", "description": "third one-block rhythm pulse"},
+      {"name": "accent1", "type": "bool32", "description": "strong first-part event"},
+      {"name": "accent2", "type": "bool32", "description": "strong second-part event"},
+      {"name": "accent3", "type": "bool32", "description": "strong third-part event"},
+      {"name": "step", "type": "int32", "description": "evaluated zero-based step"}
+    ]
+  },
+  "parameters": [
+    {"id": "com.lalzart.ksoloti.extended.sequencing.topographic-3.x", "name": "x", "type": "frac32.u.map", "default": "32", "description": "horizontal map coordinate"},
+    {"id": "com.lalzart.ksoloti.extended.sequencing.topographic-3.y", "name": "y", "type": "frac32.u.map", "default": "32", "description": "vertical map coordinate"},
+    {"id": "com.lalzart.ksoloti.extended.sequencing.topographic-3.density1", "name": "density1", "type": "frac32.u.map", "default": "32", "description": "first-part density"},
+    {"id": "com.lalzart.ksoloti.extended.sequencing.topographic-3.density2", "name": "density2", "type": "frac32.u.map", "default": "32", "description": "second-part density"},
+    {"id": "com.lalzart.ksoloti.extended.sequencing.topographic-3.density3", "name": "density3", "type": "frac32.u.map", "default": "32", "description": "third-part density"},
+    {"id": "com.lalzart.ksoloti.extended.sequencing.topographic-3.chaos", "name": "chaos", "type": "frac32.u.map", "default": "0", "description": "seeded per-pattern threshold perturbation"},
+    {"id": "com.lalzart.ksoloti.extended.sequencing.topographic-3.seed", "name": "seed", "type": "int32", "default": "1", "minimum": -2147483648, "maximum": 2147483647, "description": "deterministic chaos seed"}
+  ],
+  "implementation": {
+    "header": "topographic_3_dsp.h",
+    "class_name": "KsolotiExtendedTopographic3DSP",
+    "instance_name": "engine",
+    "init_method": "Init",
+    "process_method": "Process",
+    "rate": "krate",
+    "arguments": ["inlet_clock", "inlet_reset", "inlet_x", "inlet_y", "param_x", "param_y", "param_density1", "param_density2", "param_density3", "param_chaos", "param_seed", "outlet_part1", "outlet_part2", "outlet_part3", "outlet_accent1", "outlet_accent2", "outlet_accent3", "outlet_step"]
+  },
+  "resources": {"max_voices": 1, "state_bytes": 16, "scratch_bytes": 0, "bounded_work_per_block": 128},
+  "compatibility": {"tier": "core", "build_status": "offline-verified", "tested_targets": ["host-c++17", "ksoloti-core@1.1.0"], "notes": "Portable pattern tests and the combined Cortex-M4 target link passed."},
+  "tests": ["edge-only", "step-wrap", "density-monotonicity", "coordinate-variation", "seed-repeatability", "accent-subset"]
+}

@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "stable_id": "com.lalzart.ksoloti.extended.grain.clocked-delay",
+  "id": "clocked-delay",
+  "uuid": "2b23521f-90f0-535c-baf7-ee2dce7439af",
+  "description": "Clock-triggered four-voice granular delay with fixed delay position, grain size, pitch, freeze, alternating stereo placement, and bounded feedback. Tags: grain, clocked, delay, freeze, stereo, external-audio, very-heavy.",
+  "author": "Lance Ship",
+  "license": "GPL-3.0-or-later",
+  "ports": {"inlets": [{"name": "input", "type": "frac32buffer.bipolar", "description": "audio written to delay memory"}, {"name": "clock", "type": "bool32", "description": "spawn one grain on rising edge"}], "outlets": [{"name": "left", "type": "frac32buffer.bipolar", "description": "left grain mix"}, {"name": "right", "type": "frac32buffer.bipolar", "description": "right grain mix"}]},
+  "parameters": [
+    {"id": "com.lalzart.ksoloti.extended.grain.clocked-delay.delay", "name": "delay", "type": "frac32.u.map", "default": "32"},
+    {"id": "com.lalzart.ksoloti.extended.grain.clocked-delay.size", "name": "size", "type": "frac32.u.map", "default": "28"},
+    {"id": "com.lalzart.ksoloti.extended.grain.clocked-delay.pitch", "name": "pitch", "type": "frac32.u.map", "default": "21"},
+    {"id": "com.lalzart.ksoloti.extended.grain.clocked-delay.feedback", "name": "feedback", "type": "frac32.u.map", "default": "18"},
+    {"id": "com.lalzart.ksoloti.extended.grain.clocked-delay.freeze", "name": "freeze", "type": "bool32.tgl", "default": "0"}
+  ],
+  "implementation": {"header": "clocked_delay_dsp.h", "class_name": "KsolotiExtendedClockedDelayDSP", "instance_name": "engine", "init_method": "Init", "process_method": "Process", "rate": "krate", "arguments": ["inlet_input", "inlet_clock", "param_delay", "param_size", "param_pitch", "param_feedback", "param_freeze", "outlet_left", "outlet_right", "BUFSIZE"]},
+  "resources": {"max_voices": 4, "state_bytes": 32864, "scratch_bytes": 0, "bounded_work_per_block": 6144},
+  "compatibility": {"tier": "h7-recommended", "build_status": "offline-verified", "tested_targets": ["host-c++17", "ksoloti-core@1.1.0"], "notes": "The complete granular-water Cortex-M4 link passed but used 50036 of 51200 CCMSRAM bytes (97.73 percent); H7 is recommended for realistic combinations."},
+  "tests": ["startup-silent", "clock-edge-grain", "four-voice-bound", "freeze-holds-write-head", "feedback-bound"]
+}
