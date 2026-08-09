@@ -48,6 +48,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.datatransfer.Clipboard;
@@ -146,6 +147,13 @@ public class PatchGUI extends Patch {
 
     public PatchGUI() {
         super();
+
+        /* Embedded subpatches deserialize as PatchGUI even for compile-only
+           builds. Their patch model is still required, but constructing the
+           editor's drag-and-drop UI is invalid in a headless JVM. */
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
 
         Layers.setLayout(null);
         Layers.setSize(Constants.PATCH_SIZE, Constants.PATCH_SIZE);
@@ -1156,6 +1164,9 @@ public class PatchGUI extends Patch {
     @Override
     public void PostContructor() {
         super.PostContructor();
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
         objectLayerPanel.removeAll();
         netLayerPanel.removeAll();
 

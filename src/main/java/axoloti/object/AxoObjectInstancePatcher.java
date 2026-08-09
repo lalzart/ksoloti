@@ -28,6 +28,7 @@ import components.ButtonComponent;
 import components.ButtonComponent.ActListener;
 
 // import java.awt.Component;
+import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.io.File;
 
@@ -60,7 +61,10 @@ public class AxoObjectInstancePatcher extends AxoObjectInstance {
         if (pg == null) {
             pg = new PatchGUI();
         }
-        if (pf == null) {
+        if (GraphicsEnvironment.isHeadless()) {
+            pg.PostContructor();
+        }
+        else if (pf == null) {
             pf = new PatchFrame(pg);
             pg.setFileNamePath(getInstanceName());
             pg.PostContructor();
