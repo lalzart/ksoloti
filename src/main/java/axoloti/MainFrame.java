@@ -730,6 +730,8 @@ public final class MainFrame extends javax.swing.JFrame implements ActionListene
             tstring = "Ksoloti";
         }
 
+        tstring = BuildIdentity.applicationTitle(tstring);
+
         if (Axoloti.isDeveloper()) {
             tsuffix += "Developer";
         }
@@ -899,7 +901,7 @@ public final class MainFrame extends javax.swing.JFrame implements ActionListene
         helpMenu1 = new axoloti.menus.HelpMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
-        setTitle("Ksoloti");
+        setTitle(BuildIdentity.applicationTitle("Ksoloti"));
         setMinimumSize(new java.awt.Dimension(320, 180));
         setPreferredSize(new java.awt.Dimension(600, 400));
         addWindowListener(new java.awt.event.WindowAdapter() {

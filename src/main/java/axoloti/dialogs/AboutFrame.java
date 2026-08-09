@@ -19,6 +19,7 @@
 
 package axoloti.dialogs;
 
+import axoloti.BuildIdentity;
 import axoloti.Version;
 import axoloti.utils.Constants;
 import axoloti.utils.FirmwareID;
@@ -55,7 +56,7 @@ public class AboutFrame extends javax.swing.JFrame {
             ex.printStackTrace(System.out);
         }
 
-        jBuildVersionTxt.setText(Version.AXOLOTI_VERSION);
+        jBuildVersionTxt.setText(BuildIdentity.buildVersion(Version.AXOLOTI_VERSION));
         jBuildDateTxt.setText(Version.AXOLOTI_BUILD_TIME);
         jJavaVersionTxt.setText(System.getProperty("java.version"));
         jFirmwareVersionTxt.setText(FirmwareID.getFirmwareID());
@@ -103,7 +104,7 @@ public class AboutFrame extends javax.swing.JFrame {
         jLabelFirmwareVersion = new javax.swing.JLabel();
         jFirmwareVersionTxt = new javax.swing.JLabel();
 
-        setTitle("About Axoloti");
+        setTitle(BuildIdentity.applicationTitle("About Ksoloti"));
 
         jTextPaneAboutHtml.setEditable(false);
         jTextPaneAboutHtml.setContentType("text/html");

@@ -62,7 +62,8 @@ import javax.swing.UIManager;
 public class Axoloti {
     private final static Logger LOGGER = Logger.getLogger(Axoloti.class.getName());
 
-    public final static int SINGLE_INSTANCE_PORT = 55576; /* For checking if another Patcher instance is running */
+    /* Keep the local fork independent from public Patcher instances. */
+    public final static int SINGLE_INSTANCE_PORT = BuildIdentity.SINGLE_INSTANCE_PORT;
     private static Thread singleInstanceListenerThread;
 
     public final static String HOME_DIR       = "axoloti_home";
