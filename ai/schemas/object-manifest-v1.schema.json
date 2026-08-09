@@ -36,8 +36,16 @@
           "name": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"},
           "type": {"type": "string"},
           "default": {"type": "string", "pattern": "^[+-]?([0-9]+(\\.[0-9]*)?|\\.[0-9]+)$"},
+          "minimum": {"type": "integer", "minimum": -2147483648, "maximum": 2147483647},
+          "maximum": {"type": "integer", "minimum": -2147483648, "maximum": 2147483647},
           "description": {"type": "string"}
-        }
+        },
+        "allOf": [
+          {
+            "if": {"properties": {"type": {"enum": ["int32", "int32.small"]}}},
+            "then": {"required": ["minimum", "maximum"]}
+          }
+        ]
       }
     },
     "implementation": {
@@ -63,6 +71,28 @@
         "state_bytes": {"type": "integer", "minimum": 0},
         "scratch_bytes": {"type": "integer", "minimum": 0},
         "bounded_work_per_block": {"type": "integer", "minimum": 0}
+      }
+    },
+    "compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tier", "build_status", "tested_targets", "notes"],
+      "properties": {
+        "tier": {
+          "enum": ["core", "core-heavy", "h7-recommended", "reference"]
+        },
+        "build_status": {
+          "enum": [
+            "offline-verified", "host-verified", "not-tested",
+            "build-failed", "source-required"
+          ]
+        },
+        "tested_targets": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "uniqueItems": true
+        },
+        "notes": {"type": "string", "minLength": 1}
       }
     },
     "tests": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}

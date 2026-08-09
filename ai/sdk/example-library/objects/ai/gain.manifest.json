@@ -34,5 +34,11 @@
     "scratch_bytes": 0,
     "bounded_work_per_block": 16
   },
+  "compatibility": {
+    "tier": "core",
+    "build_status": "host-verified",
+    "tested_targets": ["host-c++17"],
+    "notes": "Reference Object SDK behavior test passed; no target claim is made here."
+  },
   "tests": ["silence", "unity-bound", "negative-input", "maximum-block"]
 }

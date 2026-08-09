@@ -18,11 +18,26 @@ The manifest schema requires:
   per block; and
 - named behavior tests.
 
+An optional machine-readable `compatibility` record separates routine `core`
+objects from `core-heavy`, `h7-recommended`, and `reference` modules. Its
+`build_status` and `tested_targets` fields record actual offline evidence. The
+tier is a scheduling hint, not proof that a patch meets its real-time budget on
+connected hardware.
+
 The glue generator accepts only C/C++ identifiers and a closed set of generated
 argument names such as `inlet_in`, `outlet_out`, `param_level`, and `BUFSIZE`.
 It rejects arbitrary expressions in those fields. This is an injection barrier
 for glue generation, not a sandbox for the included DSP header; native DSP code
 remains trusted and must be reviewed.
+
+`int32` and `int32.small` parameters must declare inclusive `minimum` and
+`maximum` values. The generator writes those bounds as the nested `MinValue`
+and `MaxValue` elements required by the 1.1.0 SimpleXML model; an unbounded or
+out-of-range integer default is rejected before legacy glue is emitted.
+User underscores in port and parameter names remain single in manifests and
+patch source, while generated C identifiers use the legacy Java spelling with
+doubled underscores (for example, `minimum_frequency` becomes
+`param_minimum__frequency`).
 
 The example under `sdk/example-library/objects/ai/` demonstrates the intended
 shape. Its DSP loop has a fixed block bound, uses fixed-point arithmetic, makes

@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """Validate AI schemas and one minimal instance of each schema."""
 
+import copy
 import json
 from pathlib import Path
 
@@ -46,6 +47,22 @@ def main() -> int:
         )
     )
     Draft202012Validator(object_schema, format_checker=FormatChecker()).validate(manifest)
+    bounded = copy.deepcopy(manifest)
+    bounded["parameters"].append(
+        {
+            "id": bounded["stable_id"] + ".count",
+            "name": "count",
+            "type": "int32",
+            "default": "2",
+            "minimum": 1,
+            "maximum": 4,
+        }
+    )
+    object_validator = Draft202012Validator(object_schema, format_checker=FormatChecker())
+    object_validator.validate(bounded)
+    del bounded["parameters"][-1]["maximum"]
+    if not list(object_validator.iter_errors(bounded)):
+        raise AssertionError("object schema accepted int32 without maximum")
     print("JSON schemas: 3 passed")
     return 0
 

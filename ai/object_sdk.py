@@ -17,6 +17,7 @@ IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 STABLE_ID_RE = re.compile(r"^[a-z0-9]+(?:[._-][a-z0-9]+)+$")
 ARGUMENT_RE = re.compile(r"^(?:(?:inlet|outlet|param|attr)_[A-Za-z0-9_]+|BUFSIZE)$")
 NUMBER_RE = re.compile(r"^[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)$")
+INTEGER_RE = re.compile(r"^[+-]?[0-9]+$")
 RESERVED_INSTANCE_NAMES = {"Init", "MidiInHandler", "dispose", "dsp"}
 PORT_TYPES = {
     "frac32",
@@ -44,6 +45,17 @@ PARAMETER_TYPES = {
     "bool32.tgl",
     "bool32.mom",
 }
+BOUNDED_INTEGER_PARAMETER_TYPES = {"int32", "int32.small"}
+COMPATIBILITY_TIERS = {"core", "core-heavy", "h7-recommended", "reference"}
+COMPATIBILITY_BUILD_STATUSES = {
+    "offline-verified",
+    "host-verified",
+    "not-tested",
+    "build-failed",
+    "source-required",
+}
+INT32_MIN = -(1 << 31)
+INT32_MAX = (1 << 31) - 1
 
 
 def _diagnostic(code: str, message: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
@@ -147,6 +159,33 @@ def validate_manifest(manifest: Dict[str, Any], base_dir: Path) -> List[Dict[str
             diagnostics.append(
                 _diagnostic("E_SDK_PARAMETER_DEFAULT", f"parameter default must be numeric: {name}")
             )
+        if parameter["type"] in BOUNDED_INTEGER_PARAMETER_TYPES:
+            minimum = parameter.get("minimum")
+            maximum = parameter.get("maximum")
+            default = str(parameter["default"])
+            valid_bounds = (
+                isinstance(minimum, int)
+                and not isinstance(minimum, bool)
+                and isinstance(maximum, int)
+                and not isinstance(maximum, bool)
+                and INT32_MIN <= minimum <= maximum <= INT32_MAX
+            )
+            integral_default = INTEGER_RE.fullmatch(default) is not None
+            default_value = int(default) if integral_default else 0
+            if not valid_bounds:
+                diagnostics.append(
+                    _diagnostic(
+                        "E_SDK_PARAMETER_BOUNDS",
+                        f"{parameter['type']} parameter needs ordered 32-bit integer minimum and maximum: {name}",
+                    )
+                )
+            elif not integral_default or not minimum <= default_value <= maximum:
+                diagnostics.append(
+                    _diagnostic(
+                        "E_SDK_PARAMETER_DEFAULT",
+                        f"integer parameter default must be within its declared bounds: {name}",
+                    )
+                )
 
     implementation = manifest.get("implementation")
     implementation_fields = {
@@ -208,6 +247,36 @@ def validate_manifest(manifest: Dict[str, Any], base_dir: Path) -> List[Dict[str
                 diagnostics.append(_diagnostic("E_SDK_RESOURCE_VALUE", f"{name} must be a non-negative integer"))
         if isinstance(resources.get("max_voices"), int) and resources["max_voices"] < 1:
             diagnostics.append(_diagnostic("E_SDK_RESOURCE_VALUE", "max_voices must be at least one"))
+    compatibility = manifest.get("compatibility")
+    if compatibility is not None:
+        compatibility_fields = {"tier", "build_status", "tested_targets", "notes"}
+        if not isinstance(compatibility, dict) or set(compatibility) != compatibility_fields:
+            diagnostics.append(
+                _diagnostic("E_SDK_COMPATIBILITY", "compatibility fields do not match SDK v1")
+            )
+        else:
+            if compatibility["tier"] not in COMPATIBILITY_TIERS:
+                diagnostics.append(_diagnostic("E_SDK_COMPATIBILITY_TIER", "unknown compatibility tier"))
+            if compatibility["build_status"] not in COMPATIBILITY_BUILD_STATUSES:
+                diagnostics.append(
+                    _diagnostic("E_SDK_COMPATIBILITY_STATUS", "unknown compatibility build status")
+                )
+            tested_targets = compatibility["tested_targets"]
+            if (
+                not isinstance(tested_targets, list)
+                or any(not isinstance(item, str) or not item for item in tested_targets)
+                or len(tested_targets) != len(set(tested_targets))
+            ):
+                diagnostics.append(
+                    _diagnostic(
+                        "E_SDK_COMPATIBILITY_TARGETS",
+                        "tested_targets must contain unique non-empty strings",
+                    )
+                )
+            if not isinstance(compatibility["notes"], str) or not compatibility["notes"]:
+                diagnostics.append(
+                    _diagnostic("E_SDK_COMPATIBILITY_NOTES", "compatibility notes cannot be empty")
+                )
     tests = manifest.get("tests")
     if not isinstance(tests, list) or not tests or any(not isinstance(item, str) or not item for item in tests):
         diagnostics.append(_diagnostic("E_SDK_TESTS", "tests must name at least one non-empty test vector"))
@@ -227,7 +296,16 @@ def render_axo(manifest: Dict[str, Any]) -> bytes:
     instance = implementation["instance_name"]
     declaration = f'{implementation["class_name"]} {instance};'
     init = f"{instance}.{implementation['init_method']}();"
-    arguments = ", ".join(implementation["arguments"])
+    def legacy_argument_name(argument: str) -> str:
+        if argument == "BUFSIZE":
+            return argument
+        prefix, name = argument.split("_", 1)
+        # The legacy Java generator escapes user underscores by doubling them
+        # in generated C identifiers. Manifests retain the readable logical
+        # name; only emitted glue uses the Java ABI spelling.
+        return prefix + "_" + name.replace("_", "__")
+
+    arguments = ", ".join(legacy_argument_name(item) for item in implementation["arguments"])
     process = f"{instance}.{implementation['process_method']}({arguments});"
     lines = [
         '<objdefs appVersion="1.1.0">',
@@ -255,7 +333,15 @@ def render_axo(manifest: Dict[str, Any]) -> bytes:
             attributes = {"name": parameter["name"]}
             if parameter.get("description"):
                 attributes["description"] = parameter["description"]
-            lines.append(_element(parameter["type"], attributes, indent=3))
+            if parameter["type"] in BOUNDED_INTEGER_PARAMETER_TYPES:
+                lines.append("   " * 3 + f'<{parameter["type"]}' + "".join(
+                    f' {key}="{html.escape(value, quote=True)}"' for key, value in attributes.items()
+                ) + ">")
+                lines.append(_element("MinValue", {"i": str(parameter["minimum"])}, indent=4))
+                lines.append(_element("MaxValue", {"i": str(parameter["maximum"])}, indent=4))
+                lines.append("   " * 3 + f'</{parameter["type"]}>')
+            else:
+                lines.append(_element(parameter["type"], attributes, indent=3))
         lines.append("   " * 2 + "</params>")
     else:
         lines.append(_element("params", indent=2))
@@ -293,6 +379,7 @@ def manifest_report(path: Path) -> Tuple[Dict[str, Any], Optional[Dict[str, Any]
         "stable_id": manifest.get("stable_id", ""),
         "axo_sha256": hashlib.sha256(rendered).hexdigest() if rendered else "",
         "resources": manifest.get("resources", {}),
+        "compatibility": manifest.get("compatibility"),
         "tests": manifest.get("tests", []),
         "diagnostics": diagnostics,
     }, manifest

@@ -207,6 +207,18 @@ class KSAITestCase(unittest.TestCase):
             ),
         )
 
+    def test_catalog_carries_validated_object_sdk_compatibility(self):
+        library = AI_DIR / "sdk" / "example-library"
+        catalog, diagnostics = ksai.build_catalog([("sdk", library)])
+        self.assertEqual([], diagnostics)
+        gain = next(item for item in catalog["objects"] if item["id"] == "ai/gain")
+        self.assertEqual("core", gain["sdk"]["compatibility"]["tier"])
+        self.assertEqual("host-verified", gain["sdk"]["compatibility"]["build_status"])
+        searched = ksai.search_catalog(catalog, "gain", 1)["matches"][0]
+        self.assertEqual(gain["sdk"], searched["sdk"])
+        inspected = ksai.inspect_catalog(catalog, "sdk:ai/gain")
+        self.assertEqual(gain["sdk"], inspected["variants"][0]["sdk"])
+
     def test_search_groups_overloads_and_returns_compact_signatures(self):
         result = ksai.search_catalog(self.catalog(), "mix", 5)
         self.assertEqual(1, len(result["matches"]))

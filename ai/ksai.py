@@ -333,6 +333,50 @@ def _parse_object_file(
     return objects, []
 
 
+def _object_sdk_sidecar(
+    library_root: Path,
+    object_path: Path,
+) -> Tuple[Optional[Dict[str, Any]], List[Diagnostic]]:
+    manifest_path = object_path.with_name(object_path.stem + ".manifest.json")
+    if not manifest_path.is_file():
+        return None, []
+
+    from object_sdk import manifest_report, render_axo
+
+    report, manifest = manifest_report(manifest_path)
+    relative_manifest = manifest_path.relative_to(library_root).as_posix()
+    if not report["ok"] or manifest is None:
+        diagnostics = []
+        for item in report["diagnostics"]:
+            context = dict(item.get("context", {}))
+            context["manifest"] = relative_manifest
+            diagnostics.append(
+                Diagnostic(
+                    item.get("severity", "error"),
+                    item.get("code", "E_OBJECT_SDK"),
+                    item.get("message", "invalid Object SDK sidecar"),
+                    context=context,
+                )
+            )
+        return None, diagnostics
+    if render_axo(manifest) != object_path.read_bytes():
+        return None, [
+            Diagnostic(
+                "error",
+                "E_OBJECT_SDK_GLUE_DRIFT",
+                f"generated Object SDK glue differs from {object_path.name}",
+                context={"manifest": relative_manifest},
+            )
+        ]
+    return {
+        "stable_id": manifest["stable_id"],
+        "manifest": relative_manifest,
+        "resources": manifest["resources"],
+        "compatibility": manifest.get("compatibility"),
+        "tests": manifest["tests"],
+    }, []
+
+
 def build_catalog(libraries: Sequence[Tuple[str, Path]]) -> Tuple[Dict[str, Any], List[Diagnostic]]:
     if not libraries:
         raise KSAIError("at least one --library NAME=PATH is required")
@@ -354,8 +398,19 @@ def build_catalog(libraries: Sequence[Tuple[str, Path]]) -> Tuple[Dict[str, Any]
             relative_source = path.relative_to(root).as_posix()
             file_fingerprints.append(f"{relative_source}\0{_sha256(path.read_bytes())}")
             parsed, file_diagnostics = _parse_object_file(name, root, objects_dir, path)
+            sdk, sdk_diagnostics = _object_sdk_sidecar(root, path)
+            manifest_path = path.with_name(path.stem + ".manifest.json")
+            if manifest_path.is_file():
+                relative_manifest = manifest_path.relative_to(root).as_posix()
+                file_fingerprints.append(
+                    f"{relative_manifest}\0{_sha256(manifest_path.read_bytes())}"
+                )
+            if sdk is not None:
+                for obj in parsed:
+                    obj["sdk"] = sdk
             library_objects.extend(parsed)
             diagnostics.extend(file_diagnostics)
+            diagnostics.extend(sdk_diagnostics)
 
         for obj in library_objects:
             previous = seen_refs.get(obj["ref"])
@@ -449,6 +504,7 @@ def search_catalog(catalog: Dict[str, Any], query: str, limit: int) -> Dict[str,
                 "description": first.get("description", ""),
                 "license": first.get("license", ""),
                 "variant_count": len(variants),
+                "sdk": first.get("sdk"),
                 "variants": [
                     {
                         "ref": variant["ref"],
@@ -505,6 +561,7 @@ def inspect_catalog(catalog: Dict[str, Any], requested: str) -> Dict[str, Any]:
                 "attributes": item["attributes"],
                 "source": item["source"],
                 "implementation": item["implementation"],
+                "sdk": item.get("sdk"),
             }
         )
     return {
@@ -541,6 +598,7 @@ def explain_validated_patch(result: Dict[str, Any], catalog: Dict[str, Any]) -> 
             "id": node["id"],
             "object": node["resolved_ref"],
             "description": by_ref[node["resolved_ref"]]["description"],
+            "sdk": by_ref[node["resolved_ref"]].get("sdk"),
             "parameters": node["parameters"],
             "attributes": node["attributes"],
             "outgoing_edges": sum(
